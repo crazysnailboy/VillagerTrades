@@ -1,0 +1,10 @@
+{
+	profession: {
+		name: "vtt:tinkerer",
+		texture: "vtt:textures/entity/villager/tinkerer.png",
+		zombieTexture: "minecraft:textures/entity/zombie_villager/zombie_farmer.png"
+	},
+	careers: [
+		"tinkerer"
+	]
+}

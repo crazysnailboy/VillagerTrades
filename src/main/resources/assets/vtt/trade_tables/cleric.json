@@ -1,0 +1,13 @@
+{ 
+	Profession:"minecraft:priest", 
+	Career:"cleric",
+
+	Offers:{
+		Recipes:[
+		
+			{action:"remove", buy:{id:"minecraft:rotten_flesh"},sell:{id:"minecraft:emerald"},CareerLevel:1}
+			
+		]
+	}
+
+}

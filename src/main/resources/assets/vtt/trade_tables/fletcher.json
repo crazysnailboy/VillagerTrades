@@ -1,0 +1,14 @@
+{ 
+	Profession:"minecraft:farmer",
+	Career:"fletcher",
+
+	Offers:{
+		Recipes:[
+		
+			{action:"add", buy:{id:"minecraft:feather",Count:{min:15,max:20}},sell:{id:"minecraft:emerald",Count:1},CareerLevel:3},
+			{action:"add", buy:{id:"minecraft:flint",Count:{min:16,max:24}},sell:{id:"minecraft:emerald",Count:1},CareerLevel:3}
+			
+		]
+	}
+
+}
