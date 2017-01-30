@@ -1,17 +1,15 @@
 package net.crazysnailboy.mods.villagertrades;
 
+import net.crazysnailboy.mods.villagertrades.command.ModCommand;
 import net.crazysnailboy.mods.villagertrades.util.StackTraceUtil;
-import net.crazysnailboy.mods.villagertrades.util.TableLoader;
-import net.minecraft.entity.passive.EntityVillager.ITradeList;
+import net.crazysnailboy.mods.villagertrades.util.JsonFileLoader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
 import net.minecraftforge.fml.common.event.FMLInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPostInitializationEvent;
 import net.minecraftforge.fml.common.event.FMLPreInitializationEvent;
-import net.minecraftforge.fml.common.registry.VillagerRegistry;
-import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerCareer;
-import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerProfession;
+import net.minecraftforge.fml.common.event.FMLServerStartingEvent;
 
 @Mod(modid = VillagerTradesMod.MODID, name = VillagerTradesMod.MODNAME, version = VillagerTradesMod.VERSION)
 public class VillagerTradesMod 
@@ -31,7 +29,7 @@ public class VillagerTradesMod
 	{	
 		System.out.println("--------------------");
 
-		TableLoader.preInit();
+		JsonFileLoader.preInit();
 		
 		System.out.println("--------------------");
 	}
@@ -54,5 +52,12 @@ public class VillagerTradesMod
 	public void postInit(FMLPostInitializationEvent event)
 	{
 	}
+	
+	
+	@EventHandler
+	public void serverStarting(FMLServerStartingEvent event)
+	{
+		event.registerServerCommand(new ModCommand());
+	}	
 
 }

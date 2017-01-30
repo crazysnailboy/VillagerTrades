@@ -7,6 +7,7 @@ import org.apache.commons.lang3.StringUtils;
 import net.minecraft.entity.passive.EntityVillager.ITradeList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
 import net.minecraftforge.fml.common.registry.VillagerRegistry;
 import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerCareer;
 import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerProfession;
@@ -40,11 +41,18 @@ public class VillagerRegistryHelper
 		}
 		return null;
 	}
+	
+	public static int getProfessionId(VillagerProfession profession)
+	{
+		return ((FMLControlledNamespacedRegistry<VillagerProfession>)VillagerRegistry.instance().getRegistry()).getIDForObject(profession);
+	}
+	
 
-//	public static ResourceLocation getProfessionName(VillagerProfession profession)
-//	{
-//		return ObfuscationReflectionHelper.getPrivateValue(VillagerProfession.class, profession, "name");
-//	}
+	public static ResourceLocation getProfessionName(VillagerProfession profession)
+	{
+		return ObfuscationReflectionHelper.getPrivateValue(VillagerProfession.class, profession, "name");
+	}
+	
 //	
 //	public static List<VillagerCareer> getProfessionCareers(VillagerProfession profession)
 //	{
@@ -79,7 +87,13 @@ public class VillagerRegistryHelper
 //	}
 
 
-	public static List<ITradeList> getCareerTrades(VillagerCareer career, int level)
+	public static List<List<ITradeList>> getCareerTrades(VillagerCareer career)
+	{
+		List<List<ITradeList>> trades = ObfuscationReflectionHelper.getPrivateValue(VillagerCareer.class, career, "trades");
+		return trades;
+	}
+	
+	public static List<ITradeList> getCareerTradesForLevel(VillagerCareer career, int level)
 	{
 		List<List<ITradeList>> trades = ObfuscationReflectionHelper.getPrivateValue(VillagerCareer.class, career, "trades");
 		int index = level - 1;

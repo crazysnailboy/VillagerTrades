@@ -1,0 +1,10 @@
+{
+	profession: {
+		name: "vtt:redstoner",
+		texture: "vtt:textures/entity/villager/redstoner.png",
+		zombieTexture: "minecraft:textures/entity/zombie_villager/zombie_farmer.png"
+	},
+	careers: [
+		"redstoner"
+	]
+}
