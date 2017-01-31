@@ -5,7 +5,7 @@
 	Offers:{
 		Recipes:[
 		
-			{action:"remove", buy:{id:"minecraft:rotten_flesh"},sell:{id:"minecraft:emerald"},CareerLevel:1}
+			{action:"_remove", buy:{id:"minecraft:rotten_flesh"},sell:{id:"minecraft:emerald"},CareerLevel:1}
 			
 		]
 	}

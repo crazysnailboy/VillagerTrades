@@ -1,0 +1,24 @@
+{ 
+	Profession: "vtt:redstoner", 
+	Career:"redstoner",
+
+    Offers:{
+        Recipes:[
+            {
+				action: "add",
+                buy:{id:"minecraft:emerald",Count:{min:5,max:5}},
+                sell:{id:"minecraft:written_book",Count:1,
+                    tag:{
+                        title:"Purchased Book",
+                        author:"A Villager",
+                        generation:1,
+                        pages:[
+                            "{text:\"Hello World!\",color:black}"
+                        ]
+                    }
+                },
+                CareerLevel:1
+            }
+        ]
+	}
+}
