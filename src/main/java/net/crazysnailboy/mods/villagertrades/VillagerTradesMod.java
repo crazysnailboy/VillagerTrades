@@ -16,7 +16,7 @@ public class VillagerTradesMod
 	
 	public static final String MODID = "vtt";
 	public static final String MODNAME = "Villager Trade Tables";
-	public static final String VERSION = "0.1";
+	public static final String VERSION = "0.2";
 
 	
 	@Instance(MODID)
