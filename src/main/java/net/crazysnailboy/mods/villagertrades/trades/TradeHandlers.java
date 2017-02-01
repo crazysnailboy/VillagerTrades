@@ -3,6 +3,7 @@ package net.crazysnailboy.mods.villagertrades.trades;
 import java.util.HashMap;
 
 import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.EmeraldForItemStacks;
+import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.ItemStackAndEmeraldToItemStack;
 import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.ListItemStackForEmeralds;
 import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.ListItemStackWithPotionEffectForEmeralds;
 import net.minecraft.entity.passive.EntityVillager.EmeraldForItems;
@@ -54,6 +55,7 @@ public class TradeHandlers
 		// custom
 		tradeHandlers.put(ListItemStackForEmeralds.class, new ListItemStackForEmeraldsHandler());
 		tradeHandlers.put(ListItemStackWithPotionEffectForEmeralds.class, new ListItemStackWithPotionEffectForEmeraldsHandler());
+		tradeHandlers.put(ItemStackAndEmeraldToItemStack.class, new ItemStackAndEmeraldToItemStackHandler());
 	}
 	
 
@@ -163,6 +165,17 @@ public class TradeHandlers
 		{
 			ListItemStackWithPotionEffectForEmeralds trade = (ListItemStackWithPotionEffectForEmeralds)t; 
 			ItemStack stack = trade.stack.copy();
+			return stack;
+		}
+	}
+	
+	public static class ItemStackAndEmeraldToItemStackHandler extends VillagerSellsItemsHandler
+	{
+		@Override
+		public ItemStack getSellingStack(ITradeList t)
+		{
+			ItemStackAndEmeraldToItemStack trade = (ItemStackAndEmeraldToItemStack)t;
+			ItemStack stack = trade.sellingItemstack.copy();
 			return stack;
 		}
 	}

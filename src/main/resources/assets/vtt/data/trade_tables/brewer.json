@@ -1,0 +1,37 @@
+{ 
+	Profession:"vtt:brewer",
+	Career:"brewer",
+
+	Offers:{
+		Recipes:[
+			{
+				action:"add", CareerLevel:1,
+				buyB:{id:"minecraft:emerald",Count:1}, buy:{id:"minecraft:carrot",Count:1},
+				sell:{id:"minecraft:golden_carrot",Count:1}
+			},
+			{
+				action:"add", CareerLevel:1,
+				buyB:{id:"minecraft:emerald",Count:1}, buy:{id:"minecraft:melon",Count:1},
+				sell:{id:"minecraft:speckled_melon",Count:1}
+			},
+			{
+				action:"add", CareerLevel:1,
+				buy:{id:"minecraft:emerald",Count:{min:3,max:5}},
+				sell:{id:"minecraft:fish",Count:1,Damage:3}
+			},
+			
+			{
+				action:"add",CareerLevel:2,
+				buy:{id:"minecraft:emerald",Count:{min:3,max:5}},
+				sell:{id:"minecraft:potion",Count:1,tag:{potion:"random"}}
+			},
+			{
+				action:"add",CareerLevel:2,
+				buy:{id:"minecraft:emerald",Count:{min:3,max:5}},
+				sell:{id:"minecraft:tipped_arrow",Count:{min:8,max:16},tag:{potion:"random"}}
+			}
+			
+			
+		]
+	}
+}

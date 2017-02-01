@@ -405,187 +405,187 @@ public class JsonToNBT
 	}
 
 	abstract static class Any
-		{
-			protected String json;
+	{
+		protected String json;
 
-			/**
-			 * Parses the JSON string contained in this object.
-			 * @return an {@link NBTBase} which can be safely cast to the type represented by this class.
-			 */
-			public abstract NBTBase parse() throws NBTException;
-		}
+		/**
+		 * Parses the JSON string contained in this object.
+		 * @return an {@link NBTBase} which can be safely cast to the type represented by this class.
+		 */
+		public abstract NBTBase parse() throws NBTException;
+	}
 
 	static class Compound extends JsonToNBT.Any
+	{
+		protected java.util.List<JsonToNBT.Any> tagList = Lists.<JsonToNBT.Any>newArrayList();
+
+		public Compound(String jsonIn)
 		{
-			protected java.util.List<JsonToNBT.Any> tagList = Lists.<JsonToNBT.Any>newArrayList();
-
-			public Compound(String jsonIn)
-			{
-				this.json = jsonIn;
-			}
-
-			/**
-			 * Parses the JSON string contained in this object.
-			 * @return an {@link NBTBase} which can be safely cast to the type represented by this class.
-			 */
-			public NBTBase parse() throws NBTException
-			{
-				NBTTagCompound nbttagcompound = new NBTTagCompound();
-
-				for (JsonToNBT.Any jsontonbt$any : this.tagList)
-				{
-					nbttagcompound.setTag(jsontonbt$any.json, jsontonbt$any.parse());
-				}
-
-				return nbttagcompound;
-			}
+			this.json = jsonIn;
 		}
+
+		/**
+		 * Parses the JSON string contained in this object.
+		 * @return an {@link NBTBase} which can be safely cast to the type represented by this class.
+		 */
+		public NBTBase parse() throws NBTException
+		{
+			NBTTagCompound nbttagcompound = new NBTTagCompound();
+
+			for (JsonToNBT.Any jsontonbt$any : this.tagList)
+			{
+				nbttagcompound.setTag(jsontonbt$any.json, jsontonbt$any.parse());
+			}
+
+			return nbttagcompound;
+		}
+	}
 
 	static class List extends JsonToNBT.Any
+	{
+		protected java.util.List<JsonToNBT.Any> tagList = Lists.<JsonToNBT.Any>newArrayList();
+
+		public List(String json)
 		{
-			protected java.util.List<JsonToNBT.Any> tagList = Lists.<JsonToNBT.Any>newArrayList();
-
-			public List(String json)
-			{
-				this.json = json;
-			}
-
-			/**
-			 * Parses the JSON string contained in this object.
-			 * @return an {@link NBTBase} which can be safely cast to the type represented by this class.
-			 */
-			public NBTBase parse() throws NBTException
-			{
-				NBTTagList nbttaglist = new NBTTagList();
-
-				for (JsonToNBT.Any jsontonbt$any : this.tagList)
-				{
-					nbttaglist.appendTag(jsontonbt$any.parse());
-				}
-
-				return nbttaglist;
-			}
+			this.json = json;
 		}
+
+		/**
+		 * Parses the JSON string contained in this object.
+		 * @return an {@link NBTBase} which can be safely cast to the type represented by this class.
+		 */
+		public NBTBase parse() throws NBTException
+		{
+			NBTTagList nbttaglist = new NBTTagList();
+
+			for (JsonToNBT.Any jsontonbt$any : this.tagList)
+			{
+				nbttaglist.appendTag(jsontonbt$any.parse());
+			}
+
+			return nbttaglist;
+		}
+	}
 
 	static class Primitive extends JsonToNBT.Any
-		{
-			private static final Pattern DOUBLE = Pattern.compile("[-+]?[0-9]*\\.?[0-9]+[d|D]");
-			private static final Pattern FLOAT = Pattern.compile("[-+]?[0-9]*\\.?[0-9]+[f|F]");
-			private static final Pattern BYTE = Pattern.compile("[-+]?[0-9]+[b|B]");
-			private static final Pattern LONG = Pattern.compile("[-+]?[0-9]+[l|L]");
-			private static final Pattern SHORT = Pattern.compile("[-+]?[0-9]+[s|S]");
-			private static final Pattern INTEGER = Pattern.compile("[-+]?[0-9]+");
-			private static final Pattern DOUBLE_UNTYPED = Pattern.compile("[-+]?[0-9]*\\.?[0-9]+");
-			private static final Splitter SPLITTER = Splitter.on(',').omitEmptyStrings();
-			/** The value to be parsed into a tag. */
-			protected String jsonValue;
+	{
+		private static final Pattern DOUBLE = Pattern.compile("[-+]?[0-9]*\\.?[0-9]+[d|D]");
+		private static final Pattern FLOAT = Pattern.compile("[-+]?[0-9]*\\.?[0-9]+[f|F]");
+		private static final Pattern BYTE = Pattern.compile("[-+]?[0-9]+[b|B]");
+		private static final Pattern LONG = Pattern.compile("[-+]?[0-9]+[l|L]");
+		private static final Pattern SHORT = Pattern.compile("[-+]?[0-9]+[s|S]");
+		private static final Pattern INTEGER = Pattern.compile("[-+]?[0-9]+");
+		private static final Pattern DOUBLE_UNTYPED = Pattern.compile("[-+]?[0-9]*\\.?[0-9]+");
+		private static final Splitter SPLITTER = Splitter.on(',').omitEmptyStrings();
+		/** The value to be parsed into a tag. */
+		protected String jsonValue;
 
-			public Primitive(String jsonIn, String valueIn)
+		public Primitive(String jsonIn, String valueIn)
+		{
+			this.json = jsonIn;
+			this.jsonValue = valueIn;
+		}
+
+		/**
+		 * Parses the JSON string contained in this object.
+		 * @return an {@link NBTBase} which can be safely cast to the type represented by this class.
+		 */
+		public NBTBase parse() throws NBTException
+		{
+			try
 			{
-				this.json = jsonIn;
-				this.jsonValue = valueIn;
+				if (DOUBLE.matcher(this.jsonValue).matches())
+				{
+					return new NBTTagDouble(Double.parseDouble(this.jsonValue.substring(0, this.jsonValue.length() - 1)));
+				}
+
+				if (FLOAT.matcher(this.jsonValue).matches())
+				{
+					return new NBTTagFloat(Float.parseFloat(this.jsonValue.substring(0, this.jsonValue.length() - 1)));
+				}
+
+				if (BYTE.matcher(this.jsonValue).matches())
+				{
+					return new NBTTagByte(Byte.parseByte(this.jsonValue.substring(0, this.jsonValue.length() - 1)));
+				}
+
+				if (LONG.matcher(this.jsonValue).matches())
+				{
+					return new NBTTagLong(Long.parseLong(this.jsonValue.substring(0, this.jsonValue.length() - 1)));
+				}
+
+				if (SHORT.matcher(this.jsonValue).matches())
+				{
+					return new NBTTagShort(Short.parseShort(this.jsonValue.substring(0, this.jsonValue.length() - 1)));
+				}
+
+				if (INTEGER.matcher(this.jsonValue).matches())
+				{
+					return new NBTTagInt(Integer.parseInt(this.jsonValue));
+				}
+
+				if (DOUBLE_UNTYPED.matcher(this.jsonValue).matches())
+				{
+					return new NBTTagDouble(Double.parseDouble(this.jsonValue));
+				}
+
+				if ("true".equalsIgnoreCase(this.jsonValue) || "false".equalsIgnoreCase(this.jsonValue))
+				{
+					return new NBTTagByte((byte)(Boolean.parseBoolean(this.jsonValue) ? 1 : 0));
+				}
+			}
+			catch (NumberFormatException var6)
+			{
+				this.jsonValue = this.jsonValue.replaceAll("\\\\\"", "\"");
+				return new NBTTagString(this.jsonValue);
 			}
 
-			/**
-			 * Parses the JSON string contained in this object.
-			 * @return an {@link NBTBase} which can be safely cast to the type represented by this class.
-			 */
-			public NBTBase parse() throws NBTException
+			if (this.jsonValue.startsWith("[") && this.jsonValue.endsWith("]"))
 			{
+				String s = this.jsonValue.substring(1, this.jsonValue.length() - 1);
+				String[] astring = (String[])Iterables.toArray(SPLITTER.split(s), String.class);
+
 				try
 				{
-					if (DOUBLE.matcher(this.jsonValue).matches())
+					int[] aint = new int[astring.length];
+
+					for (int j = 0; j < astring.length; ++j)
 					{
-						return new NBTTagDouble(Double.parseDouble(this.jsonValue.substring(0, this.jsonValue.length() - 1)));
+						aint[j] = Integer.parseInt(astring[j].trim());
 					}
 
-					if (FLOAT.matcher(this.jsonValue).matches())
-					{
-						return new NBTTagFloat(Float.parseFloat(this.jsonValue.substring(0, this.jsonValue.length() - 1)));
-					}
-
-					if (BYTE.matcher(this.jsonValue).matches())
-					{
-						return new NBTTagByte(Byte.parseByte(this.jsonValue.substring(0, this.jsonValue.length() - 1)));
-					}
-
-					if (LONG.matcher(this.jsonValue).matches())
-					{
-						return new NBTTagLong(Long.parseLong(this.jsonValue.substring(0, this.jsonValue.length() - 1)));
-					}
-
-					if (SHORT.matcher(this.jsonValue).matches())
-					{
-						return new NBTTagShort(Short.parseShort(this.jsonValue.substring(0, this.jsonValue.length() - 1)));
-					}
-
-					if (INTEGER.matcher(this.jsonValue).matches())
-					{
-						return new NBTTagInt(Integer.parseInt(this.jsonValue));
-					}
-
-					if (DOUBLE_UNTYPED.matcher(this.jsonValue).matches())
-					{
-						return new NBTTagDouble(Double.parseDouble(this.jsonValue));
-					}
-
-					if ("true".equalsIgnoreCase(this.jsonValue) || "false".equalsIgnoreCase(this.jsonValue))
-					{
-						return new NBTTagByte((byte)(Boolean.parseBoolean(this.jsonValue) ? 1 : 0));
-					}
+					return new NBTTagIntArray(aint);
 				}
-				catch (NumberFormatException var6)
+				catch (NumberFormatException var5)
 				{
-					this.jsonValue = this.jsonValue.replaceAll("\\\\\"", "\"");
 					return new NBTTagString(this.jsonValue);
 				}
-
-				if (this.jsonValue.startsWith("[") && this.jsonValue.endsWith("]"))
+			}
+			else
+			{
+				if (this.jsonValue.startsWith("\"") && this.jsonValue.endsWith("\""))
 				{
-					String s = this.jsonValue.substring(1, this.jsonValue.length() - 1);
-					String[] astring = (String[])Iterables.toArray(SPLITTER.split(s), String.class);
+					this.jsonValue = this.jsonValue.substring(1, this.jsonValue.length() - 1);
+				}
 
-					try
+				this.jsonValue = this.jsonValue.replaceAll("\\\\\"", "\"");
+				StringBuilder stringbuilder = new StringBuilder();
+
+				for (int i = 0; i < this.jsonValue.length(); ++i)
+				{
+					if (i < this.jsonValue.length() - 1 && this.jsonValue.charAt(i) == 92 && this.jsonValue.charAt(i + 1) == 92)
 					{
-						int[] aint = new int[astring.length];
-
-						for (int j = 0; j < astring.length; ++j)
-						{
-							aint[j] = Integer.parseInt(astring[j].trim());
-						}
-
-						return new NBTTagIntArray(aint);
+						stringbuilder.append('\\');
+						++i;
 					}
-					catch (NumberFormatException var5)
+					else
 					{
-						return new NBTTagString(this.jsonValue);
+						stringbuilder.append(this.jsonValue.charAt(i));
 					}
 				}
-				else
-				{
-					if (this.jsonValue.startsWith("\"") && this.jsonValue.endsWith("\""))
-					{
-						this.jsonValue = this.jsonValue.substring(1, this.jsonValue.length() - 1);
-					}
 
-					this.jsonValue = this.jsonValue.replaceAll("\\\\\"", "\"");
-					StringBuilder stringbuilder = new StringBuilder();
-
-					for (int i = 0; i < this.jsonValue.length(); ++i)
-					{
-						if (i < this.jsonValue.length() - 1 && this.jsonValue.charAt(i) == 92 && this.jsonValue.charAt(i + 1) == 92)
-						{
-							stringbuilder.append('\\');
-							++i;
-						}
-						else
-						{
-							stringbuilder.append(this.jsonValue.charAt(i));
-						}
-					}
-
-					return new NBTTagString(stringbuilder.toString());
-				}
+				return new NBTTagString(stringbuilder.toString());
 			}
 		}
+	}
 }

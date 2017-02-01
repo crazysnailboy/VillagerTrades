@@ -24,20 +24,8 @@ import java.util.stream.Stream;
 
 import org.apache.commons.io.IOUtils;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-
 import net.crazysnailboy.mods.villagertrades.VillagerTradesMod;
-import net.crazysnailboy.mods.villagertrades.common.config.ModConfiguration;
-import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper;
-import net.crazysnailboy.mods.villagertrades.trades.VillagerTradeUtils;
-import net.minecraftforge.common.DimensionManager;
 import net.minecraftforge.fml.common.Loader;
-import net.minecraftforge.fml.common.registry.VillagerRegistry;
-import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerCareer;
-import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerProfession;
 
 
 public class FileUtils

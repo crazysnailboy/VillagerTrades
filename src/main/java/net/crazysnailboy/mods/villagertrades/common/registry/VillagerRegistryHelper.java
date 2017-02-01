@@ -1,6 +1,11 @@
 package net.crazysnailboy.mods.villagertrades.common.registry;
 
+import java.util.AbstractMap;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -9,95 +14,156 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
 import net.minecraftforge.fml.common.registry.VillagerRegistry;
-import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerCareer;
-import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerProfession;
 
 public class VillagerRegistryHelper
 {
 	
+	public static class VillagerProfessionWrapper
+	{
+		private static final Class professionClass = VillagerRegistry.VillagerProfession.class;
+		
+		public VillagerRegistry.VillagerProfession profession;
+		
+		
+		public int getId()
+		{
+			return ((FMLControlledNamespacedRegistry<VillagerRegistry.VillagerProfession>)VillagerRegistry.instance().getRegistry()).getIDForObject(this.profession);
+		}
+		
+		public ResourceLocation getName()
+		{
+			return (ResourceLocation)ObfuscationReflectionHelper.getPrivateValue(professionClass, this.profession, "name");
+		}
+		
+		public List<VillagerRegistry.VillagerCareer> getCareers()
+		{
+			return (List<VillagerRegistry.VillagerCareer>)ObfuscationReflectionHelper.getPrivateValue(professionClass, this.profession, "careers");
+		}
+		
+		public VillagerRegistry.VillagerCareer getCareer(String name)
+		{
+			List<VillagerRegistry.VillagerCareer> careers = (List<VillagerRegistry.VillagerCareer>)ObfuscationReflectionHelper.getPrivateValue(professionClass, this.profession, "careers");
+			for ( VillagerRegistry.VillagerCareer career : careers )
+			{
+				if (career.getName().equals(name)) return career;
+			}
+			return null;
+		}
 
-	public static VillagerProfession getProfession(String value)
+		public VillagerRegistry.VillagerCareer getCareer(int id)
+		{
+			return this.profession.getCareer(id - 1);
+		}
+		
+		
+		
+		public VillagerProfessionWrapper(VillagerRegistry.VillagerProfession profession)
+		{
+			this.profession = profession;
+		}
+	}
+	
+	
+	
+	public static class VillagerCareerWrapper
+	{
+		private static final Class careerClass = VillagerRegistry.VillagerCareer.class;
+
+		public VillagerRegistry.VillagerCareer career;
+
+		
+		public int getId()
+		{
+			int id = (Integer)ObfuscationReflectionHelper.getPrivateValue(careerClass, this.career, "id");
+			return id + 1;
+		}
+		
+		public String getName()
+		{
+			return this.career.getName();
+		}
+		
+		public int getCareerLevels()
+		{
+			List<List<ITradeList>> trades = (List<List<ITradeList>>)ObfuscationReflectionHelper.getPrivateValue(careerClass, this.career, "trades");
+			return trades.size();
+		}
+		
+		public List<List<ITradeList>> getTrades()
+		{
+			List<List<ITradeList>> trades = (List<List<ITradeList>>)ObfuscationReflectionHelper.getPrivateValue(careerClass, this.career, "trades");
+			return trades;
+		}
+		
+		public List<ITradeList> getTrades(int level)
+		{
+			List<List<ITradeList>> trades = (List<List<ITradeList>>)ObfuscationReflectionHelper.getPrivateValue(careerClass, this.career, "trades");
+			int index = level - 1;
+			return index >= 0 && index < trades.size() ? trades.get(index) : null;
+		}
+		
+		
+		public VillagerCareerWrapper(VillagerRegistry.VillagerCareer career)
+		{
+			this.career = career;
+		}
+		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+
+	public static VillagerRegistry.VillagerProfession getProfession(String value)
 	{
 		return (StringUtils.isNumeric(value) ? getProfessionById(Integer.parseInt(value)) : getProfessionByName(new ResourceLocation(value)));
 	}
 	
 	
 	@SuppressWarnings("deprecation")
-	private static VillagerProfession getProfessionById(int value)
+	private static VillagerRegistry.VillagerProfession getProfessionById(int value)
 	{
 		return VillagerRegistry.getById(value);
 	}
 	
-	private static VillagerProfession getProfessionByName(ResourceLocation value)
+	private static VillagerRegistry.VillagerProfession getProfessionByName(ResourceLocation value)
 	{
-		List<VillagerProfession> professions = VillagerRegistry.instance().getRegistry().getValues();
-		for ( VillagerProfession profession : professions )
+		return VillagerRegistry.instance().getRegistry().getValue(value);
+	}
+	
+	
+	public static List<Map.Entry<Integer,String>> getProfessionIdsAndNamesSortedById()
+	{
+		List<Map.Entry<Integer,String>> professions = new ArrayList<Map.Entry<Integer,String>>();
+		
+		for (VillagerRegistry.VillagerProfession profession : VillagerRegistry.instance().getRegistry().getValues())
 		{
-			ResourceLocation resourceLocation = ObfuscationReflectionHelper.getPrivateValue(VillagerProfession.class, profession, "name");
-			if (value.equals(resourceLocation))
-			{
-				return profession;
-			}
+			VillagerProfessionWrapper wrapper = new VillagerProfessionWrapper(profession);
+			
+			int id = wrapper.getId();
+			String name = wrapper.getName().toString();
+			
+			professions.add(new AbstractMap.SimpleEntry<Integer,String>(id, name));
+			
 		}
-		return null;
-	}
-	
-	public static int getProfessionId(VillagerProfession profession)
-	{
-		return ((FMLControlledNamespacedRegistry<VillagerProfession>)VillagerRegistry.instance().getRegistry()).getIDForObject(profession);
-	}
-	
-
-	public static ResourceLocation getProfessionName(VillagerProfession profession)
-	{
-		return ObfuscationReflectionHelper.getPrivateValue(VillagerProfession.class, profession, "name");
-	}
-	
-//	
-//	public static List<VillagerCareer> getProfessionCareers(VillagerProfession profession)
-//	{
-//		return ObfuscationReflectionHelper.getPrivateValue(VillagerProfession.class, profession, "careers");
-//	}
-
-
-	public static VillagerCareer getCareer(VillagerProfession profession, String value)
-	{
-		return (StringUtils.isNumeric(value) ? getCareerById(profession, Integer.parseInt(value)) : getCareerByName(profession, value));
-	}
-	
-	private static VillagerCareer getCareerById(VillagerProfession profession, int value)
-	{
-		return profession.getCareer(value - 1);
-	}
-	
-	private static VillagerCareer getCareerByName(VillagerProfession profession, String value)
-	{
-		List<VillagerCareer> careers = ObfuscationReflectionHelper.getPrivateValue(VillagerProfession.class, profession, "careers");
-		for ( VillagerCareer career : careers )
+		
+		Collections.sort( professions, new Comparator<Map.Entry<Integer,String>>() 
 		{
-			if (career.getName().equals(value)) return career;
-		}
-		return null;
+		    public int compare(Map.Entry<Integer,String> o1, Map.Entry<Integer,String> o2) 
+		    {
+		    	return o1.getKey() - o2.getKey();
+	        }					
+		});
+		
+		return professions;
+		
 	}
 	
-//	public static int getCareerMaxLevel(VillagerCareer career)
-//	{
-//		List<List<ITradeList>> trades = ObfuscationReflectionHelper.getPrivateValue(VillagerCareer.class, career, "trades");
-//		return trades.size();
-//	}
-
-
-	public static List<List<ITradeList>> getCareerTrades(VillagerCareer career)
-	{
-		List<List<ITradeList>> trades = ObfuscationReflectionHelper.getPrivateValue(VillagerCareer.class, career, "trades");
-		return trades;
-	}
-	
-	public static List<ITradeList> getCareerTradesForLevel(VillagerCareer career, int level)
-	{
-		List<List<ITradeList>> trades = ObfuscationReflectionHelper.getPrivateValue(VillagerCareer.class, career, "trades");
-		int index = level - 1;
-		return index >= 0 && index < trades.size() ? trades.get(index) : null;
-	}
 	
 }

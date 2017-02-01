@@ -2,12 +2,10 @@ package net.crazysnailboy.mods.villagertrades.trades;
 
 import java.util.Random;
 
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
-import net.minecraft.potion.Potion;
 import net.minecraft.potion.PotionType;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.village.MerchantRecipe;
@@ -34,6 +32,7 @@ public class CustomTrades
             this.priceInfo = priceInfo;
         }
 
+        @Override
         public void addMerchantRecipe(IMerchant merchant, MerchantRecipeList recipeList, Random random)
         {
             int amount = 1;
@@ -43,6 +42,39 @@ public class CustomTrades
             recipeList.add(new MerchantRecipe(this.stack, Items.EMERALD));
         }
     }
+    
+    
+    
+    
+    public static class VTTListItemsForEmeralds implements EntityVillager.ITradeList
+    {
+    	
+        public EntityVillager.PriceInfo buyingPriceInfo;
+        public ItemStack sellingItemstack;
+        public EntityVillager.PriceInfo sellingPriceInfo;
+
+        
+        public VTTListItemsForEmeralds(EntityVillager.PriceInfo buyingPriceInfo, ItemStack sellingItemstack, EntityVillager.PriceInfo sellingPriceInfo)
+    	{
+            this.buyingPriceInfo = buyingPriceInfo;
+            this.sellingItemstack = sellingItemstack.copy();
+            this.sellingPriceInfo = sellingPriceInfo;
+    	}
+    	
+        @Override
+        public void addMerchantRecipe(IMerchant merchant, MerchantRecipeList recipeList, Random random)
+        {
+            int buyAmount = this.buyingPriceInfo.getPrice(random);
+            int sellAmount = this.sellingPriceInfo.getPrice(random);
+            
+            ItemStack buy1 = new ItemStack(Items.EMERALD, buyAmount);
+            ItemStack sell = this.sellingItemstack.copy(); sell.setCount(sellAmount);
+            
+            
+            recipeList.add(new MerchantRecipe(buy1, sell));
+        }
+    }
+    
     
     
     /**
@@ -62,26 +94,27 @@ public class CustomTrades
             this.priceInfo = priceInfo;
         }
 
+        @Override
         public void addMerchantRecipe(IMerchant merchant, MerchantRecipeList recipeList, Random random)
         {
             int amount = 1;
             if (this.priceInfo != null) amount = this.priceInfo.getPrice(random);
 
-            ItemStack itemstack;
-            ItemStack itemstack1 = stack.copy();
+            ItemStack buy1;
+            ItemStack sell = stack.copy();
 
             if (amount < 0)
             {
-                itemstack = new ItemStack(Items.EMERALD);
-                itemstack1.setCount(0 - amount);
+                buy1 = new ItemStack(Items.EMERALD);
+                sell.setCount(0 - amount);
             }
             else
             {
-                itemstack = new ItemStack(Items.EMERALD, amount);
-                itemstack1.setCount(1);
+                buy1 = new ItemStack(Items.EMERALD, amount);
+                sell.setCount(1);
             }
 
-            recipeList.add(new MerchantRecipe(itemstack, itemstack1));
+            recipeList.add(new MerchantRecipe(buy1, sell));
         }
     }
     
@@ -102,6 +135,7 @@ public class CustomTrades
             this.priceInfo = priceInfo;
         }
 
+        @Override
         public void addMerchantRecipe(IMerchant merchant, MerchantRecipeList recipeList, Random random)
         {
         	System.out.println("ListItemStackWithPotionEffectForEmeralds$addMerchantRecipe");
@@ -121,6 +155,47 @@ public class CustomTrades
             recipeList.add(new MerchantRecipe(itemstack, itemstack1));
         }
     }
+
+    
+    
+    public static class ItemStackAndEmeraldToItemStack implements EntityVillager.ITradeList
+    {
+        /** The itemstack to buy with an emerald. The Item and damage value is used only, any tag data is not retained. */
+        public ItemStack buyingItemStack;
+        /** The price info defining the amount of the buying item required with 1 emerald to match the selling item. */
+        public EntityVillager.PriceInfo buyingPriceInfo;
+        /** The itemstack to sell. The item and damage value are used only, any tag data is not retained. */
+        public ItemStack sellingItemstack;
+        public EntityVillager.PriceInfo sellingPriceInfo;
+
+        /**
+         * @param buyingStack The itemstack to buy with an emerald
+         * @param buyingPriceInfo The price info defining the amount of the buying item required with 1 emerald to match the selling item
+         * @param sellingItemstack The itemstack to sell
+         * @param sellingPriceInfo
+         */
+        public ItemStackAndEmeraldToItemStack(ItemStack buyingStack, EntityVillager.PriceInfo buyingPriceInfo, ItemStack sellingItemstack, EntityVillager.PriceInfo sellingPriceInfo)
+        {
+            this.buyingItemStack = buyingStack.copy();
+            this.buyingPriceInfo = buyingPriceInfo;
+            this.sellingItemstack = sellingItemstack.copy();
+            this.sellingPriceInfo = sellingPriceInfo;
+        }
+
+        @Override
+        public void addMerchantRecipe(IMerchant merchant, MerchantRecipeList recipeList, Random random)
+        {
+            int buyAmount = this.buyingPriceInfo.getPrice(random);
+            int sellAmount = this.sellingPriceInfo.getPrice(random);
+            
+            ItemStack buy1 = this.buyingItemStack.copy(); buy1.setCount(1); // new ItemStack(this.buyingItemStack.getItem(), buyAmount, this.buyingItemStack.getMetadata());
+            ItemStack buy2 = new ItemStack(Items.EMERALD, buyAmount);
+            ItemStack sell = this.sellingItemstack.copy(); sell.setCount(sellAmount); // new ItemStack(this.sellingItemstack.getItem(), sellAmount, this.sellingItemstack.getMetadata());
+            
+            recipeList.add(new MerchantRecipe(buy1, buy2, sell));
+        }
+    }
+    
     
 
 }
