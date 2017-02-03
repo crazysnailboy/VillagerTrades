@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Map;
 
 import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper;
-import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper.VillagerCareerWrapper;
-import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper.VillagerProfessionWrapper;
+import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper.VTTVillagerCareer;
+import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper.VTTVillagerProfession;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommand;
 import net.minecraft.command.ICommandSender;
@@ -63,9 +63,9 @@ public class ModCommand implements ICommand
 			
 			if (args.length == 0)
 			{
-				for ( Map.Entry<Integer,String> keyValuePair : VillagerRegistryHelper.getProfessionIdsAndNamesSortedById() )
+				for ( Map.Entry<Integer,String> kvp : VillagerRegistryHelper.getProfessionIdsAndNamesSortedById() )
 				{
-					sender.sendMessage(new TextComponentString(keyValuePair.getKey() + ": " + keyValuePair.getValue()));
+					sender.sendMessage(new TextComponentString(kvp.getKey() + ": " + kvp.getValue()));
 				}
 				return;
 			}
@@ -75,11 +75,11 @@ public class ModCommand implements ICommand
 				VillagerProfession profession = VillagerRegistryHelper.getProfession(args[1]);
 				if (profession != null)
 				{
-					for (VillagerCareer career : new VillagerProfessionWrapper(profession).getCareers())
+					for (VillagerCareer career : new VTTVillagerProfession(profession).getCareers())
 					{
-						VillagerCareerWrapper wrapper = new VillagerCareerWrapper(career);
-						sender.sendMessage(new TextComponentString(wrapper.getId() + ": " + wrapper.getName()));
-						sender.sendMessage(new TextComponentString("\t" + wrapper.getCareerLevels() + " levels"));
+						VTTVillagerCareer vttCareer = new VTTVillagerCareer(career);
+						sender.sendMessage(new TextComponentString(vttCareer.getId() + ": " + vttCareer.getName()));
+						sender.sendMessage(new TextComponentString("\t" + vttCareer.getCareerLevels() + " levels"));
 					}
 				}
 			}

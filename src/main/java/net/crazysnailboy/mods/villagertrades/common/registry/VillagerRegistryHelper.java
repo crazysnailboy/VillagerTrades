@@ -18,7 +18,7 @@ import net.minecraftforge.fml.common.registry.VillagerRegistry;
 public class VillagerRegistryHelper
 {
 	
-	public static class VillagerProfessionWrapper
+	public static class VTTVillagerProfession
 	{
 		private static final Class professionClass = VillagerRegistry.VillagerProfession.class;
 		
@@ -57,7 +57,7 @@ public class VillagerRegistryHelper
 		
 		
 		
-		public VillagerProfessionWrapper(VillagerRegistry.VillagerProfession profession)
+		public VTTVillagerProfession(VillagerRegistry.VillagerProfession profession)
 		{
 			this.profession = profession;
 		}
@@ -65,7 +65,7 @@ public class VillagerRegistryHelper
 	
 	
 	
-	public static class VillagerCareerWrapper
+	public static class VTTVillagerCareer
 	{
 		private static final Class careerClass = VillagerRegistry.VillagerCareer.class;
 
@@ -103,7 +103,7 @@ public class VillagerRegistryHelper
 		}
 		
 		
-		public VillagerCareerWrapper(VillagerRegistry.VillagerCareer career)
+		public VTTVillagerCareer(VillagerRegistry.VillagerCareer career)
 		{
 			this.career = career;
 		}
@@ -144,7 +144,7 @@ public class VillagerRegistryHelper
 		
 		for (VillagerRegistry.VillagerProfession profession : VillagerRegistry.instance().getRegistry().getValues())
 		{
-			VillagerProfessionWrapper wrapper = new VillagerProfessionWrapper(profession);
+			VTTVillagerProfession wrapper = new VTTVillagerProfession(profession);
 			
 			int id = wrapper.getId();
 			String name = wrapper.getName().toString();
@@ -164,6 +164,5 @@ public class VillagerRegistryHelper
 		return professions;
 		
 	}
-	
 	
 }

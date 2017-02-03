@@ -1,8 +1,8 @@
 package net.crazysnailboy.mods.villagertrades;
 
 import net.crazysnailboy.mods.villagertrades.command.ModCommand;
-import net.crazysnailboy.mods.villagertrades.common.registry.TradeLoader;
-import net.crazysnailboy.mods.villagertrades.common.registry.VillagerLoader;
+import net.crazysnailboy.mods.villagertrades.loaders.TradeLoader;
+import net.crazysnailboy.mods.villagertrades.loaders.VillagerLoader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -41,8 +41,10 @@ public class VillagerTradesMod
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event)
 	{
+//		System.out.println("------------------------------");
 		VillagerLoader.loadCustomVillagerData();
 		TradeLoader.loadCustomTradeData();
+//		System.out.println("------------------------------");
 	}
 	
 	@EventHandler

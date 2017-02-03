@@ -1,4 +1,4 @@
-package net.crazysnailboy.mods.villagertrades.common.registry;
+package net.crazysnailboy.mods.villagertrades.loaders;
 
 import java.util.HashMap;
 
@@ -7,7 +7,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper.VillagerProfessionWrapper;
+import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper;
+import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper.VTTVillagerProfession;
 import net.crazysnailboy.mods.villagertrades.util.FileUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.VillagerRegistry;
@@ -62,7 +63,7 @@ public class VillagerLoader
 			String careerName = jsonCareer.getAsString();
 			
 			// add the career if it doesn't already exist
-			if (new VillagerProfessionWrapper(profession).getCareer(careerName) == null)
+			if (new VTTVillagerProfession(profession).getCareer(careerName) == null)
 			{
 				new VillagerCareer(profession, careerName);
 			}

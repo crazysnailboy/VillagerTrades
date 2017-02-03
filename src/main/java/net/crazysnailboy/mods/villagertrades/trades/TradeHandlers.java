@@ -2,10 +2,9 @@ package net.crazysnailboy.mods.villagertrades.trades;
 
 import java.util.HashMap;
 
-import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.EmeraldForItemStacks;
-import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.ItemStackAndEmeraldToItemStack;
-import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.ListItemStackForEmeralds;
-import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.ListItemStackWithPotionEffectForEmeralds;
+import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.VTTEmeraldsForItems;
+import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.VTTItemsAndEmeraldsForItems;
+import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.VTTItemsForEmeralds;
 import net.minecraft.entity.passive.EntityVillager.EmeraldForItems;
 import net.minecraft.entity.passive.EntityVillager.ITradeList;
 import net.minecraft.entity.passive.EntityVillager.ItemAndEmeraldToItem;
@@ -16,35 +15,42 @@ import net.minecraft.init.Items;
 import net.minecraft.item.ItemStack;
 
 
+/**
+ * The trade handlers provide an abstraction from the differences in the various EntityVillager.ITradeList implementations
+ * and give a uniform way of getting the buying stack and/or the selling stack for each implementation. 
+ * 
+ * They also provide a convenient way of classifying the trades into buying and selling trades, which is used for sorting. 
+ *
+ */
 public class TradeHandlers 
 {
 	
-	public static abstract class VillagerTradeHandler
+	public static abstract interface ITradeHandler
 	{
 	}
 	
-	public static abstract class VillagerBuysItemsHandler extends VillagerTradeHandler
+	public static abstract class VillagerBuysItemsHandler implements ITradeHandler
 	{
 		public abstract ItemStack getBuyingStack(ITradeList trade);
 	}
 	
-	public static abstract class VillagerSellsItemsHandler extends VillagerTradeHandler
+	public static abstract class VillagerSellsItemsHandler implements ITradeHandler
 	{
 		public abstract ItemStack getSellingStack(ITradeList trade);
 	}
 
 	
-	public static final HashMap<Class<? extends ITradeList>, VillagerTradeHandler> tradeHandlers;
+	public static final HashMap<Class<? extends ITradeList>, ITradeHandler> tradeHandlers;
 	
 	static
 	{
-		tradeHandlers = new HashMap<Class<? extends ITradeList>, VillagerTradeHandler>();
+		tradeHandlers = new HashMap<Class<? extends ITradeList>, ITradeHandler>();
 		
 		// villager buying handlers
 		// built-in
 		tradeHandlers.put(EmeraldForItems.class, new EmeraldForItemsHandler());
 		// custom
-		tradeHandlers.put(EmeraldForItemStacks.class, new EmeraldForItemStacksHandler());
+		tradeHandlers.put(VTTEmeraldsForItems.class, new VTTEmeraldsForItemsHandler());
 		
 		// villager selling handlers
 		// built-in
@@ -53,9 +59,8 @@ public class TradeHandlers
 		tradeHandlers.put(ListEnchantedItemForEmeralds.class, new ListEnchantedItemForEmeraldsHandler());
 		tradeHandlers.put(ListItemForEmeralds.class, new ListItemForEmeraldsHandler());
 		// custom
-		tradeHandlers.put(ListItemStackForEmeralds.class, new ListItemStackForEmeraldsHandler());
-		tradeHandlers.put(ListItemStackWithPotionEffectForEmeralds.class, new ListItemStackWithPotionEffectForEmeraldsHandler());
-		tradeHandlers.put(ItemStackAndEmeraldToItemStack.class, new ItemStackAndEmeraldToItemStackHandler());
+		tradeHandlers.put(VTTItemsForEmeralds.class, new VTTItemsForEmeraldsHandler());
+		tradeHandlers.put(VTTItemsAndEmeraldsForItems.class, new VTTItemsAndEmeraldsForItemsHandler());
 	}
 	
 
@@ -81,13 +86,13 @@ public class TradeHandlers
 	// HANDLERS FOR CUSTOM VILLAGER BUYING TRADES 
 	// ==================================================
 	
-	public static class EmeraldForItemStacksHandler extends VillagerBuysItemsHandler
+	public static class VTTEmeraldsForItemsHandler extends VillagerBuysItemsHandler
 	{
 		@Override
 		public ItemStack getBuyingStack(ITradeList t)
 		{
-			EmeraldForItemStacks trade = (EmeraldForItemStacks)t;
-			ItemStack stack = trade.stack.copy(); 
+			VTTEmeraldsForItems trade = (VTTEmeraldsForItems)t;
+			ItemStack stack = trade.buy1.copy(); 
 			return stack;
 		}
 	}
@@ -146,36 +151,24 @@ public class TradeHandlers
 	// HANDLERS FOR CUSTOM VILLAGER SELLING TRADES 
 	// ==================================================
 	
-	public static class ListItemStackForEmeraldsHandler extends VillagerSellsItemsHandler
+	public static class VTTItemsForEmeraldsHandler extends VillagerSellsItemsHandler
 	{
 		@Override
 		public ItemStack getSellingStack(ITradeList t)
 		{
-			ListItemStackForEmeralds trade = (ListItemStackForEmeralds)t;
-			ItemStack stack = trade.stack.copy();
+			VTTItemsForEmeralds trade = (VTTItemsForEmeralds)t;
+			ItemStack stack = trade.sell.copy();
 			return stack;
 		}
 	}
 
-	
-	public static class ListItemStackWithPotionEffectForEmeraldsHandler extends VillagerSellsItemsHandler
+	public static class VTTItemsAndEmeraldsForItemsHandler extends VillagerSellsItemsHandler
 	{
 		@Override
 		public ItemStack getSellingStack(ITradeList t)
 		{
-			ListItemStackWithPotionEffectForEmeralds trade = (ListItemStackWithPotionEffectForEmeralds)t; 
-			ItemStack stack = trade.stack.copy();
-			return stack;
-		}
-	}
-	
-	public static class ItemStackAndEmeraldToItemStackHandler extends VillagerSellsItemsHandler
-	{
-		@Override
-		public ItemStack getSellingStack(ITradeList t)
-		{
-			ItemStackAndEmeraldToItemStack trade = (ItemStackAndEmeraldToItemStack)t;
-			ItemStack stack = trade.sellingItemstack.copy();
+			VTTItemsAndEmeraldsForItems trade = (VTTItemsAndEmeraldsForItems)t;
+			ItemStack stack = trade.sell.copy();
 			return stack;
 		}
 	}

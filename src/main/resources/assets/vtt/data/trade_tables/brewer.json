@@ -23,12 +23,12 @@
 			{
 				action:"add",CareerLevel:2,
 				buy:{id:"minecraft:emerald",Count:{min:3,max:5}},
-				sell:{id:"minecraft:potion",Count:1,tag:{potion:"random"}}
+				sell:{id:"minecraft:potion",Count:1,tag:{Potion:"random"}}
 			},
 			{
 				action:"add",CareerLevel:2,
 				buy:{id:"minecraft:emerald",Count:{min:3,max:5}},
-				sell:{id:"minecraft:tipped_arrow",Count:{min:8,max:16},tag:{potion:"random"}}
+				sell:{id:"minecraft:tipped_arrow",Count:{min:8,max:16},tag:{Potion:"random"}}
 			}
 			
 			

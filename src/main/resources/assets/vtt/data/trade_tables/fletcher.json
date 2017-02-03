@@ -8,9 +8,9 @@
 			{action:"add", buy:{id:"minecraft:feather",Count:{min:15,max:20}},sell:{id:"minecraft:emerald",Count:1},CareerLevel:1},
 			{action:"add", buy:{id:"minecraft:flint",Count:{min:16,max:24}},sell:{id:"minecraft:emerald",Count:1},CareerLevel:1},
 			
-			{action:"add", buy:{id:"minecraft:emerald",Count:{min:12,max:15}},sell:{id:"minecraft:bow",Count:1,tag:{ench:"random"}},CareerLevel:3},
+			{action:"add", buy:{id:"minecraft:emerald",Count:{min:12,max:15}},sell:{id:"minecraft:bow",Count:1,tag:{ench:"random"}},CareerLevel:2},
 			
-			{action:"add", buy:{id:"minecraft:emerald",Count:{min:4,max:8}},sell:{id:"minecraft:tipped_arrow",Count:1,tag:{potion:"random"}},CareerLevel:3}
+			{action:"add", buy:{id:"minecraft:emerald",Count:{min:4,max:8}},sell:{id:"minecraft:tipped_arrow",Count:1,tag:{Potion:"random"}},CareerLevel:2}
 		]
 	}
 

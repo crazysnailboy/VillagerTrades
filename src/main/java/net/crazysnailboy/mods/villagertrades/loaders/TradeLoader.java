@@ -1,4 +1,4 @@
-package net.crazysnailboy.mods.villagertrades.common.registry;
+package net.crazysnailboy.mods.villagertrades.loaders;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -11,23 +11,20 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper.VillagerCareerWrapper;
-import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper.VillagerProfessionWrapper;
+import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper;
+import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper.VTTVillagerCareer;
+import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper.VTTVillagerProfession;
 import net.crazysnailboy.mods.villagertrades.nbt.JsonToNBT;
-import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.EmeraldForItemStacks;
-import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.ItemStackAndEmeraldToItemStack;
-import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.ListItemStackForEmeralds;
-import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.ListItemStackWithPotionEffectForEmeralds;
+import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.VTTEmeraldsForItems;
+import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.VTTItemsAndEmeraldsForItems;
+import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.VTTItemsForEmeralds;
 import net.crazysnailboy.mods.villagertrades.trades.TradeHandlers;
+import net.crazysnailboy.mods.villagertrades.trades.TradeHandlers.ITradeHandler;
 import net.crazysnailboy.mods.villagertrades.trades.TradeHandlers.VillagerBuysItemsHandler;
 import net.crazysnailboy.mods.villagertrades.trades.TradeHandlers.VillagerSellsItemsHandler;
-import net.crazysnailboy.mods.villagertrades.trades.TradeHandlers.VillagerTradeHandler;
 import net.crazysnailboy.mods.villagertrades.util.FileUtils;
 import net.crazysnailboy.mods.villagertrades.util.StackTraceUtils;
-import net.minecraft.entity.passive.EntityVillager.EmeraldForItems;
 import net.minecraft.entity.passive.EntityVillager.ITradeList;
-import net.minecraft.entity.passive.EntityVillager.ListEnchantedItemForEmeralds;
-import net.minecraft.entity.passive.EntityVillager.ListItemForEmeralds;
 import net.minecraft.entity.passive.EntityVillager.PriceInfo;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -63,7 +60,7 @@ public class TradeLoader
 
 		// get the specified career and profession from the villager registry
 		VillagerProfession profession = VillagerRegistryHelper.getProfession(jsonProfession);
-		VillagerCareer career = new VillagerProfessionWrapper(profession).getCareer(jsonCareer);
+		VillagerCareer career = new VTTVillagerProfession(profession).getCareer(jsonCareer);
 		
 		// iterate over the trade recipes included in the offers object
 		JsonArray jsonRecipes = jsonObject.get("Offers").getAsJsonObject().get("Recipes").getAsJsonArray();
@@ -127,28 +124,17 @@ public class TradeLoader
 			
 			// the buy count is the number of items the player is giving to the villager in exchange for one emerald
 			PriceInfo priceInfo = getPriceInfo(jsonBuyObject, false);
-				
-			// if the stack has no metadata
-			if (buyingStack.getMetadata() == 0)
-			{
-				// create an instance of the built-in emerald for items trade
-				trade = new EmeraldForItemStacks(buyingStack, priceInfo);
-			}
-			// if it has metadata
-			else
-			{
-				// create an instance of our custom emerald for items trade
-				trade = new EmeraldForItems(buyingStack.getItem(), priceInfo);
-			}
+			
+			// create an instance of our custom emerald for items trade
+			trade = new VTTEmeraldsForItems(buyingStack, priceInfo);
 		}
 
 		// the villager is selling if the buy item or buyB item is an emerald - i.e. the player is giving emeralds and receiving items
 		if (isVillagerSelling(jsonRecipeObject))
 		{
 			// the sell item is the item the player is receiving
-			ItemStack stack = getItemStack(jsonSellObject);
+			ItemStack sellingStack = getItemStack(jsonSellObject);
 			
-
 			// the sell price is the number of items the player will receive
 			PriceInfo sellPrice = (jsonBuyBObject == null ? getPriceInfo(jsonSellObject, true) : getPriceInfo(jsonSellObject, false));
 			// the buy price is the number of emeralds the player must hand over
@@ -157,61 +143,11 @@ public class TradeLoader
 			
 			if (jsonBuyBObject == null)
 			{
+				trade = new VTTItemsForEmeralds(buyPrice, sellingStack, sellPrice);
 			}
-			
-			
-			
-			// if the sell count is a range, it is the number of items the player will receive (in exchange for one emerald)
-			if (jsonSellObject.get("Count").isJsonObject())
-			{
-				// so the sell count is the number of items the villager will give to the player
-//				PriceInfo priceInfo = getPriceInfo(jsonSellObject, true);
-				
-				if (shouldApplyRandomPotionEffect(jsonSellObject))
-				{
-					trade = new ListItemStackWithPotionEffectForEmeralds(stack, sellPrice);
-				}
-				else
-				{
-					trade = new ListItemForEmeralds(stack, sellPrice);
-				}
-				
-			}
-			// otherwise the player is giving multiple emeralds to receive one item
 			else
 			{
-				// if the player is only giving emeralds...
-				if (jsonBuyBObject == null)
-				{
-				
-					// the buy count is the number of emeralds the player must give to the villager
-//					PriceInfo priceInfo = getPriceInfo(jsonBuyObject, false);
-	
-					if (shouldApplyRandomEnchantment(jsonSellObject))
-					{
-						trade = new ListEnchantedItemForEmeralds(stack.getItem(), buyPrice);
-					}
-					else if (shouldApplyRandomPotionEffect(jsonSellObject))
-					{
-						trade = new ListItemStackWithPotionEffectForEmeralds(stack, buyPrice);
-					}
-					else
-					{
-						trade = new ListItemStackForEmeralds(stack, buyPrice);
-					}
-					
-				}
-
-				// if the player is giving items and emeralds...
-				else
-				{
-					// the buyB count is the number of emeralds the player must give to the villager
-//					PriceInfo buyPriceInfo = getPriceInfo(jsonBuyBObject, false);
-//					PriceInfo sellPriceInfo = getPriceInfo(jsonSellObject, false);
-					
-					trade = new ItemStackAndEmeraldToItemStack(getItemStack(jsonBuyObject), buyPrice, stack, sellPrice);
-				}
-				
+				trade = new VTTItemsAndEmeraldsForItems(getItemStack(jsonBuyObject), buyPrice, sellingStack, sellPrice);
 			}
 		}
 		
@@ -231,7 +167,7 @@ public class TradeLoader
 		JsonObject jsonSellObject = jsonRecipeObject.get("sell").getAsJsonObject();
 		
 		
-		List<ITradeList> trades = new VillagerCareerWrapper(career).getTrades(careerLevel);
+		List<ITradeList> trades = new VTTVillagerCareer(career).getTrades(careerLevel);
 		Iterator<ITradeList> iterator = trades.iterator();
 		
 		
@@ -245,7 +181,7 @@ public class TradeLoader
 			{
 				ITradeList trade = iterator.next();
 				
-				VillagerTradeHandler handler = TradeHandlers.tradeHandlers.get(trade.getClass());
+				ITradeHandler handler = TradeHandlers.tradeHandlers.get(trade.getClass());
 				if (handler != null && handler instanceof VillagerBuysItemsHandler)
 				{
 					ItemStack buyingStack = ((VillagerBuysItemsHandler)handler).getBuyingStack(trade);
@@ -268,7 +204,7 @@ public class TradeLoader
 			{					
 				ITradeList trade = iterator.next();
 				
-				VillagerTradeHandler handler = TradeHandlers.tradeHandlers.get(trade.getClass());
+				ITradeHandler handler = TradeHandlers.tradeHandlers.get(trade.getClass());
 				if (handler != null && handler instanceof VillagerSellsItemsHandler)
 				{
 					ItemStack sellingStack = ((VillagerSellsItemsHandler)handler).getSellingStack(trade);
@@ -291,7 +227,7 @@ public class TradeLoader
 	private static void SortCareerTrades(VillagerCareer career)
 	{
 		// get the trades from the career instance in a modifiable form
-		List<List<ITradeList>> trades = new VillagerCareerWrapper(career).getTrades();
+		List<List<ITradeList>> trades = new VTTVillagerCareer(career).getTrades();
 
 		// iterate over the trades at each career level
 		for ( List<ITradeList> levelTrades : trades )
@@ -302,8 +238,8 @@ public class TradeLoader
 				public int compare(ITradeList tradeA, ITradeList tradeB)
 				{
 					// get the appropriate trade handler for the two trades being compared
-					VillagerTradeHandler handlerA = TradeHandlers.tradeHandlers.get(tradeA.getClass());
-					VillagerTradeHandler handlerB = TradeHandlers.tradeHandlers.get(tradeB.getClass());
+					ITradeHandler handlerA = TradeHandlers.tradeHandlers.get(tradeA.getClass());
+					ITradeHandler handlerB = TradeHandlers.tradeHandlers.get(tradeB.getClass());
 					
 					if (handlerA != null && handlerB != null)
 					{
@@ -346,42 +282,39 @@ public class TradeLoader
 	}
 
 	
-	private static boolean shouldApplyRandomEnchantment(JsonObject jsonObject)
+	private static ItemStack getItemStack(JsonObject jsonObject)
 	{
-		try
+		
+		String resourceName = jsonObject.get("id").getAsString();
+		
+		ItemStack stack = new ItemStack(Item.REGISTRY.getObject(new ResourceLocation(resourceName)));
+		
+//		if (jsonObject.has("Count") && jsonObject.get("Count").isJsonPrimitive())
+//		{
+//			stack.setCount(jsonObject.get("Count").getAsInt());
+//		}
+		
+		if (jsonObject.has("Damage"))
 		{
-			return jsonObject.get("tag").getAsJsonObject().get("ench").getAsString().equals("random");
+			stack.setItemDamage(jsonObject.get("Damage").getAsInt());
 		}
-		catch(Exception ex) { return false; }
-	}
-	
-	private static boolean shouldApplyRandomPotionEffect(JsonObject jsonObject)
-	{
-		try
+		
+		if (jsonObject.has("tag"))
 		{
-			return jsonObject.get("tag").getAsJsonObject().get("potion").getAsString().equals("random");
+			try 
+			{
+				String jsonString = jsonObject.get("tag").getAsJsonObject().toString();
+				NBTTagCompound compound = JsonToNBT.getTagFromJson(jsonString);
+				stack.setTagCompound(compound);
+			} 
+			catch (NBTException ex) 
+			{
+				System.out.println(StackTraceUtils.getStackTrace(ex));
+			}
 		}
-		catch(Exception ex) { return false; }
+		
+		return stack;		
 	}
-	
-	
-	private static NBTTagCompound getTagFromJson(JsonObject jsonObject)
-	{
-		try 
-		{
-			String jsonString = jsonObject.get("tag").getAsJsonObject().toString();
-			NBTTagCompound compound = JsonToNBT.getTagFromJson(jsonString);
-			return compound;
-		} 
-		catch (NBTException ex) 
-		{
-			System.out.println(StackTraceUtils.getStackTrace(ex));
-			return null;
-		}
-	}
-	
-	
-	
 	
 	private static PriceInfo getPriceInfo(JsonObject jsonObject, boolean isPlayerBuying)
 	{
@@ -389,10 +322,6 @@ public class TradeLoader
 		
 		int minValue = (jsonCountElement.isJsonObject() ? jsonCountElement.getAsJsonObject().get("min").getAsInt() : jsonCountElement.getAsInt());
 		int maxValue = (jsonCountElement.isJsonObject() ? jsonCountElement.getAsJsonObject().get("max").getAsInt() : jsonCountElement.getAsInt());
-		
-//		JsonObject jsonCountObject = jsonObject.get("Count").getAsJsonObject();
-//		int minValue = jsonCountObject.get("min").getAsInt();
-//		int maxValue = jsonCountObject.get("max").getAsInt();
 		
 		if (isPlayerBuying)
 		{
@@ -404,57 +333,5 @@ public class TradeLoader
 		}
 		
 	}
-	
-	
-	
-	
-	
-	
-	private static ItemStack getItemStack(JsonObject jsonObject)
-	{
-		
-		String resourceName = jsonObject.get("id").getAsString();
-		
-		ItemStack stack = new ItemStack(Item.REGISTRY.getObject(new ResourceLocation(resourceName)));
-		
-		if (jsonObject.has("Damage"))
-		{
-			stack.setItemDamage(jsonObject.get("Damage").getAsInt());
-		}
-		
-		if (jsonObject.has("Count") && jsonObject.get("Count").isJsonPrimitive())
-		{
-			stack.setCount(jsonObject.get("Count").getAsInt());
-		}
-		
-		if (jsonObject.has("tag"))
-		{
-			boolean tagIsRandomEnchant = false; 
-			boolean tagIsRandomPotionEffect = false; 
-			
-			try 
-			{ 
-				tagIsRandomEnchant = jsonObject.get("tag").getAsJsonObject().get("ench").getAsString().equals("random"); 
-			} 
-			catch(Exception ex) { }
-			
-			try 
-			{ 
-				tagIsRandomPotionEffect = jsonObject.get("tag").getAsJsonObject().get("potion").getAsString().equals("random"); 
-			} 
-			catch(Exception ex) { }
-			
-			
-			if (!(tagIsRandomEnchant || tagIsRandomPotionEffect))
-			{
-				NBTTagCompound compound = getTagFromJson(jsonObject);
-				if (compound != null) stack.setTagCompound(compound);
-			}
-		}
-		
-		
-		return stack;		
-	}
-	
 
 }
