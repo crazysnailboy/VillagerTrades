@@ -16,8 +16,11 @@ public class ModConfiguration
 	private static Configuration config = null;
 	private static ConfigEventHandler configEventHandler = new ConfigEventHandler();
 
+	
 	public static boolean loadJsonFilesFromJar;
 	public static boolean copyJsonFilesToConfig;
+	
+	public static String[] currencyItems = new String[] { "minecraft:emerald" };
 	
 	
 	public static void preInit()
@@ -72,6 +75,11 @@ public class ModConfiguration
 		Property propCopyJsonFilesToConfig = config.get(Configuration.CATEGORY_GENERAL, "copyJsonFilesToConfig", true, "");
 		propCopyJsonFilesToConfig.setLanguageKey("options.copyJsonFilesToConfig");
 		propCopyJsonFilesToConfig.setRequiresMcRestart(true);
+		
+		Property propCurrencyItems = config.get(Configuration.CATEGORY_GENERAL, "excludedItems", currencyItems, "List of items which cannot be uncrafted");
+		propCurrencyItems.setLanguageKey("uncrafting.options.excludedItems");
+		propCurrencyItems.setRequiresMcRestart(false);
+		
 
 		
 //		try

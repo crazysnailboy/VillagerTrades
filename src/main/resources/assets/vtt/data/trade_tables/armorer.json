@@ -1,0 +1,14 @@
+{ 
+	Profession: "minecraft:smith", 
+	Career:"armor",
+
+	Offers:{
+		Recipes:[
+		
+			{action:"add", buy:{id:"minecraft:emerald",Count:{min:10,max:12}},sell:{id:"minecraft:diamond_helmet",Count:1,tag:{ench:"random"}}, CareerLevel:3},
+			{action:"add", buy:{id:"minecraft:emerald",Count:{min:14,max:17}},sell:{id:"minecraft:diamond_leggings",Count:1,tag:{ench:"random"}}, CareerLevel:3},
+			{action:"add", buy:{id:"minecraft:emerald",Count:{min:8,max:10}},sell:{id:"minecraft:diamond_boots",Count:1,tag:{ench:"random"}}, CareerLevel:3}
+			
+		]
+	}
+}

@@ -88,10 +88,7 @@ public class FileUtils
 			}
 			walk.close();
 		}
-		catch(Exception ex)
-		{
-			System.out.println(StackTraceUtils.getStackTrace(ex));
-		}
+		catch(Exception ex){ VillagerTradesMod.logger.catching(ex); }
 		return fileNames;	
 	}
 	
@@ -121,10 +118,7 @@ public class FileUtils
 			}
 			walk.close();
 		}
-		catch(Exception ex)
-		{
-			System.out.println(StackTraceUtils.getStackTrace(ex));
-		}
+		catch(Exception ex){ VillagerTradesMod.logger.catching(ex); }
 		return fileNames;	
 	}
 	
@@ -143,10 +137,7 @@ public class FileUtils
 			stream.close();
 			
 		}
-		catch(Exception ex)
-		{
-			System.out.println(StackTraceUtils.getStackTrace(ex));
-		}
+		catch(Exception ex){ VillagerTradesMod.logger.catching(ex); }
 		return fileContents;
 	}
 	
@@ -164,10 +155,7 @@ public class FileUtils
 			stream.close();
 			
 		}
-		catch(Exception ex)
-		{
-			System.out.println(StackTraceUtils.getStackTrace(ex));
-		}
+		catch(Exception ex){ VillagerTradesMod.logger.catching(ex); }
 		return fileContents;
 	}
 	
@@ -185,10 +173,7 @@ public class FileUtils
             outputStream.close();
             
 		}
-		catch(Exception ex)
-		{
-			System.out.println(StackTraceUtils.getStackTrace(ex));
-		}
+		catch(Exception ex){ VillagerTradesMod.logger.catching(ex); }
 	}
 
 

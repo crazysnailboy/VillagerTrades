@@ -11,6 +11,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import net.crazysnailboy.mods.villagertrades.VillagerTradesMod;
 import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper;
 import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper.VTTVillagerCareer;
 import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper.VTTVillagerProfession;
@@ -23,7 +24,6 @@ import net.crazysnailboy.mods.villagertrades.trades.TradeHandlers.ITradeHandler;
 import net.crazysnailboy.mods.villagertrades.trades.TradeHandlers.VillagerBuysItemsHandler;
 import net.crazysnailboy.mods.villagertrades.trades.TradeHandlers.VillagerSellsItemsHandler;
 import net.crazysnailboy.mods.villagertrades.util.FileUtils;
-import net.crazysnailboy.mods.villagertrades.util.StackTraceUtils;
 import net.minecraft.entity.passive.EntityVillager.ITradeList;
 import net.minecraft.entity.passive.EntityVillager.PriceInfo;
 import net.minecraft.item.Item;
@@ -38,30 +38,51 @@ import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerProfessio
 public class TradeLoader 
 {
 
+	/**
+	 * Builds a map of trade files by combining files from the assets and config folders, and loads the trade data into the registry
+	 *  
+	 */
 	public static void loadCustomTradeData()
 	{
+		// build the file map
 		HashMap<String, String> tradeFiles = FileUtils.createFileMap("trade_tables");
-		for ( String fileContents : tradeFiles.values() )
+		
+		// iterate over the filenames in the map
+		for ( String fileName : tradeFiles.keySet())
 		{
-			loadTradesFromFile(fileContents);
+			// get the file contents from the map for the specified name
+			String fileContents = tradeFiles.get(fileName);
+			try
+			{
+				// load the trades from the file contents
+				loadTradesFromFile(fileContents);
+			}
+			// write to the log if something bad happened 
+			catch (UnknownProfessionException ex){ VillagerTradesMod.logger.error("Unknown profession \"" + ex.professionName + "\" in \"" + fileName + "\""); }
+			catch (UnknownCareerException ex){ VillagerTradesMod.logger.error("Unknown career \"" + ex.careerName + "\" in \"" + fileName + "\""); }
+			catch (Exception ex){ VillagerTradesMod.logger.error("Error parsing \"" + fileName + "\": " + ex.getMessage()); }
 		}
 	}
 	
 
 	
+	/**
+	 * Parses the contents of an individual trade file, and adds or removes the trades to or from the specified profession and career 
+	 * @param fileContents
+	 */
 	private static void loadTradesFromFile(String fileContents)
 	{
 		// parse the provided string as JSON
 		JsonObject jsonObject = new JsonParser().parse(fileContents).getAsJsonObject();
-
+		
 		// identify the profession and career to apply these trades to
 		String jsonProfession = jsonObject.get("Profession").getAsString();
 		String jsonCareer = jsonObject.get("Career").getAsString();
 
 		// get the specified career and profession from the villager registry
-		VillagerProfession profession = VillagerRegistryHelper.getProfession(jsonProfession);
-		VillagerCareer career = new VTTVillagerProfession(profession).getCareer(jsonCareer);
-		
+		VillagerProfession profession = VillagerRegistryHelper.getProfession(jsonProfession); if (profession == null) throw new UnknownProfessionException(jsonProfession);
+		VillagerCareer career = new VTTVillagerProfession(profession).getCareer(jsonCareer); if (career == null) throw new UnknownCareerException(jsonCareer);
+	
 		// iterate over the trade recipes included in the offers object
 		JsonArray jsonRecipes = jsonObject.get("Offers").getAsJsonObject().get("Recipes").getAsJsonArray();
 		for ( JsonElement jsonRecipe : jsonRecipes )
@@ -93,10 +114,9 @@ public class TradeLoader
 			}
 			
 		}
-
+	
 		// sort them so that the buying trades appear before the selling trades for each level (like vanilla)
 		SortCareerTrades(career);
-		
 	}
 	
 	
@@ -219,6 +239,86 @@ public class TradeLoader
 	}
 	
 	
+	/**
+	 * Determines whether the specified trade involves the villager buying items for emeralds by checking whether the sell item is an emerald
+	 */
+	private static boolean isVillagerBuying(JsonObject jsonRecipeObject)
+	{	
+		// TODO what if the user wants to create trades using an item other than emeralds as currency? 
+		boolean isPlayerSelling = jsonRecipeObject.get("sell").getAsJsonObject().get("id").getAsString().equals("minecraft:emerald");
+		return isPlayerSelling;
+	}
+	
+	
+	/**
+	 * Determines whether the current trade involves the villager selling items for emeralds by checking whether the buy or buyB item is an emerald
+	 */
+	private static boolean isVillagerSelling(JsonObject jsonRecipeObject)
+	{
+		// TODO what if the user wants to create trades using an item other than emeralds as currency? 
+		try
+		{
+			if (jsonRecipeObject.get("buy").getAsJsonObject().get("id").getAsString().equals("minecraft:emerald")) return true;
+			if (jsonRecipeObject.get("buyB").getAsJsonObject().get("id").getAsString().equals("minecraft:emerald")) return true;
+		}
+		catch(Exception ex) { }
+		return false;
+	}
+	
+
+	
+	private static ItemStack getItemStack(JsonObject jsonObject)
+	{
+		
+		String resourceName = jsonObject.get("id").getAsString();
+		
+		ItemStack stack = new ItemStack(Item.REGISTRY.getObject(new ResourceLocation(resourceName)));
+		
+//		if (jsonObject.has("Count") && jsonObject.get("Count").isJsonPrimitive())
+//		{
+//			stack.setCount(jsonObject.get("Count").getAsInt());
+//		}
+		
+		if (jsonObject.has("Damage"))
+		{
+			stack.setItemDamage(jsonObject.get("Damage").getAsInt());
+		}
+		
+		if (jsonObject.has("tag"))
+		{
+			try 
+			{
+				String jsonString = jsonObject.get("tag").getAsJsonObject().toString();
+				NBTTagCompound compound = JsonToNBT.getTagFromJson(jsonString);
+				stack.setTagCompound(compound);
+			} 
+			catch (NBTException ex){ VillagerTradesMod.logger.catching(ex); } 
+		}
+		
+		return stack;		
+	}
+	
+	private static PriceInfo getPriceInfo(JsonObject jsonObject, boolean isPlayerBuying)
+	{
+		JsonElement jsonCountElement = jsonObject.get("Count");
+		
+		int minValue = (jsonCountElement.isJsonObject() ? jsonCountElement.getAsJsonObject().get("min").getAsInt() : jsonCountElement.getAsInt());
+		int maxValue = (jsonCountElement.isJsonObject() ? jsonCountElement.getAsJsonObject().get("max").getAsInt() : jsonCountElement.getAsInt());
+		
+		if (isPlayerBuying)
+		{
+			return new PriceInfo(0 - maxValue, 0 - minValue);
+		}
+		else
+		{
+			return new PriceInfo(minValue, maxValue);
+		}
+		
+	}
+	
+	
+	
+	
 	
 	/**
 	 * Sorts the trades at each level of a career so that the buying trades appear before the selling trades
@@ -264,74 +364,34 @@ public class TradeLoader
 	}
 	
 	
-	private static boolean isVillagerSelling(JsonObject jsonRecipeObject)
+	
+	
+	public static class UnknownProfessionException extends RuntimeException
 	{
-		try
+		public String professionName;
+		
+		public UnknownProfessionException(String professionName)
 		{
-			if (jsonRecipeObject.get("buy").getAsJsonObject().get("id").getAsString().equals("minecraft:emerald")) return true;
-			if (jsonRecipeObject.get("buyB").getAsJsonObject().get("id").getAsString().equals("minecraft:emerald")) return true;
+			this.professionName = professionName;
 		}
-		catch(Exception ex) { }
-		return false;
 	}
 	
-	private static boolean isVillagerBuying(JsonObject jsonRecipeObject)
-	{	
-		boolean isPlayerSelling = jsonRecipeObject.get("sell").getAsJsonObject().get("id").getAsString().equals("minecraft:emerald");
-		return isPlayerSelling;
-	}
-
-	
-	private static ItemStack getItemStack(JsonObject jsonObject)
+	public static class UnknownCareerException extends RuntimeException
 	{
+		public String careerName;
 		
-		String resourceName = jsonObject.get("id").getAsString();
-		
-		ItemStack stack = new ItemStack(Item.REGISTRY.getObject(new ResourceLocation(resourceName)));
-		
-//		if (jsonObject.has("Count") && jsonObject.get("Count").isJsonPrimitive())
+		public UnknownCareerException(String careerName)
+		{
+			this.careerName = careerName;
+		}
+	}
+	
+//	public static class FileParsingException extends Exception
+//	{
+//		public FileParsingException(String fileName, Exception ex)
 //		{
-//			stack.setCount(jsonObject.get("Count").getAsInt());
 //		}
-		
-		if (jsonObject.has("Damage"))
-		{
-			stack.setItemDamage(jsonObject.get("Damage").getAsInt());
-		}
-		
-		if (jsonObject.has("tag"))
-		{
-			try 
-			{
-				String jsonString = jsonObject.get("tag").getAsJsonObject().toString();
-				NBTTagCompound compound = JsonToNBT.getTagFromJson(jsonString);
-				stack.setTagCompound(compound);
-			} 
-			catch (NBTException ex) 
-			{
-				System.out.println(StackTraceUtils.getStackTrace(ex));
-			}
-		}
-		
-		return stack;		
-	}
+//	}
 	
-	private static PriceInfo getPriceInfo(JsonObject jsonObject, boolean isPlayerBuying)
-	{
-		JsonElement jsonCountElement = jsonObject.get("Count");
-		
-		int minValue = (jsonCountElement.isJsonObject() ? jsonCountElement.getAsJsonObject().get("min").getAsInt() : jsonCountElement.getAsInt());
-		int maxValue = (jsonCountElement.isJsonObject() ? jsonCountElement.getAsJsonObject().get("max").getAsInt() : jsonCountElement.getAsInt());
-		
-		if (isPlayerBuying)
-		{
-			return new PriceInfo(0 - maxValue, 0 - minValue);
-		}
-		else
-		{
-			return new PriceInfo(minValue, maxValue);
-		}
-		
-	}
 
 }

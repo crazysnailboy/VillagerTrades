@@ -1,5 +1,8 @@
 package net.crazysnailboy.mods.villagertrades;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import net.crazysnailboy.mods.villagertrades.command.ModCommand;
 import net.crazysnailboy.mods.villagertrades.loaders.TradeLoader;
 import net.crazysnailboy.mods.villagertrades.loaders.VillagerLoader;
@@ -22,6 +25,8 @@ public class VillagerTradesMod
 	
 	@Instance(MODID)
 	public static VillagerTradesMod INSTANCE;
+
+	public static Logger logger = LogManager.getLogger(MODID);
 	
 
 	@EventHandler

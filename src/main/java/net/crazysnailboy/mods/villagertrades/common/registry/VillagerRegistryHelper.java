@@ -9,15 +9,26 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import net.crazysnailboy.mods.villagertrades.VillagerTradesMod;
 import net.minecraft.entity.passive.EntityVillager.ITradeList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
+import net.minecraftforge.fml.common.registry.PersistentRegistryManager;
 import net.minecraftforge.fml.common.registry.VillagerRegistry;
+import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerProfession;
 
+/**
+ * A collection of helper methods and classes for accessing private or otherwise difficult to get to members of the VillagerRegistry
+ *
+ */
 public class VillagerRegistryHelper
 {
 	
+	/**
+	 * A wrapper class to access private or otherwise difficult to get to members of the VillagerRegistry.VillagerProfession
+	 *
+	 */
 	public static class VTTVillagerProfession
 	{
 		private static final Class professionClass = VillagerRegistry.VillagerProfession.class;
@@ -65,6 +76,10 @@ public class VillagerRegistryHelper
 	
 	
 	
+	/**
+	 * A wrapper class to access private or otherwise difficult to get to members of the VillagerRegistry.VillagerCareer
+	 *
+	 */
 	public static class VTTVillagerCareer
 	{
 		private static final Class careerClass = VillagerRegistry.VillagerCareer.class;
@@ -165,4 +180,6 @@ public class VillagerRegistryHelper
 		
 	}
 	
+	
+
 }
