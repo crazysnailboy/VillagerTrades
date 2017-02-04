@@ -165,13 +165,13 @@ public class FileUtils
 		try 
 		{
 			FileOutputStream outputStream = new FileOutputStream(outputFile);
-            BufferedWriter streamWriter = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
-            
-            streamWriter.write(fileContents);
-            
-            streamWriter.close();
-            outputStream.close();
-            
+			BufferedWriter streamWriter = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
+			
+			streamWriter.write(fileContents);
+			
+			streamWriter.close();
+			outputStream.close();
+			
 		}
 		catch(Exception ex){ VillagerTradesMod.logger.catching(ex); }
 	}

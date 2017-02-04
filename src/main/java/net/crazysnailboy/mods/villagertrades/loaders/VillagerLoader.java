@@ -7,6 +7,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import net.crazysnailboy.mods.villagertrades.VillagerTradesMod;
 import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper;
 import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper.VTTVillagerProfession;
 import net.crazysnailboy.mods.villagertrades.util.FileUtils;
@@ -18,12 +19,26 @@ import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerProfessio
 public class VillagerLoader 
 {
 
+	/**
+	 * Builds a map of villager files by combining files from the assets and config folders, and loads the villager data into the registry
+	 */
 	public static void loadCustomVillagerData()
 	{	
+		// build the file map
 		HashMap<String, String> villagerFiles = FileUtils.createFileMap("villagers");
-		for ( String fileContents : villagerFiles.values() )
+		
+		// iterate over the filenames in the map
+		for (String fileName : villagerFiles.keySet())
 		{
-			loadVillagerFromFile(fileContents);
+			// get the file contents from the map for the specified name
+			String fileContents = villagerFiles.get(fileName);
+			try
+			{
+				// load the villager from the file contents
+				loadVillagerFromFile(fileContents);
+			}
+			// write to the log if something bad happened 
+			catch (Exception ex){ VillagerTradesMod.logger.error("Error parsing \"" + fileName + "\": " + ex.getMessage()); }
 		}
 	}
 	

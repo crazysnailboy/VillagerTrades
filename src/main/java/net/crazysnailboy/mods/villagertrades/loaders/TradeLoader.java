@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -16,9 +17,11 @@ import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHel
 import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper.VTTVillagerCareer;
 import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper.VTTVillagerProfession;
 import net.crazysnailboy.mods.villagertrades.nbt.JsonToNBT;
+import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.IVTTTradeList;
 import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.VTTEmeraldsForItems;
 import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.VTTItemsAndEmeraldsForItems;
 import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.VTTItemsForEmeralds;
+import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.VTTRandomItemsForEmeralds;
 import net.crazysnailboy.mods.villagertrades.trades.TradeHandlers;
 import net.crazysnailboy.mods.villagertrades.trades.TradeHandlers.ITradeHandler;
 import net.crazysnailboy.mods.villagertrades.trades.TradeHandlers.VillagerBuysItemsHandler;
@@ -40,7 +43,6 @@ public class TradeLoader
 
 	/**
 	 * Builds a map of trade files by combining files from the assets and config folders, and loads the trade data into the registry
-	 *  
 	 */
 	public static void loadCustomTradeData()
 	{
@@ -48,7 +50,7 @@ public class TradeLoader
 		HashMap<String, String> tradeFiles = FileUtils.createFileMap("trade_tables");
 		
 		// iterate over the filenames in the map
-		for ( String fileName : tradeFiles.keySet())
+		for (String fileName : tradeFiles.keySet())
 		{
 			// get the file contents from the map for the specified name
 			String fileContents = tradeFiles.get(fileName);
@@ -60,7 +62,9 @@ public class TradeLoader
 			// write to the log if something bad happened 
 			catch (UnknownProfessionException ex){ VillagerTradesMod.logger.error("Unknown profession \"" + ex.professionName + "\" in \"" + fileName + "\""); }
 			catch (UnknownCareerException ex){ VillagerTradesMod.logger.error("Unknown career \"" + ex.careerName + "\" in \"" + fileName + "\""); }
-			catch (Exception ex){ VillagerTradesMod.logger.error("Error parsing \"" + fileName + "\": " + ex.getMessage()); }
+			//catch (Exception ex){ VillagerTradesMod.logger.error("Error parsing \"" + fileName + "\": " + ex.getMessage()); }
+			
+			catch(Exception ex){ VillagerTradesMod.logger.catching(ex); }
 		}
 	}
 	
@@ -133,8 +137,9 @@ public class TradeLoader
 		JsonObject jsonBuyObject = jsonRecipeObject.get("buy").getAsJsonObject();
 		JsonObject jsonBuyBObject = (jsonRecipeObject.has("buyB") ? jsonRecipeObject.get("buyB").getAsJsonObject() : null);
 		JsonObject jsonSellObject = jsonRecipeObject.get("sell").getAsJsonObject();
+		double chance = (jsonRecipeObject.has("chance") ? jsonRecipeObject.get("chance").getAsDouble() : 1);
 		
-		ITradeList trade = null;
+		IVTTTradeList trade = null;
 		
 		// the villager is buying if the sell item is an emerald - i.e. the player is giving items and receiving emeralds
 		if (isVillagerBuying(jsonRecipeObject))
@@ -152,26 +157,43 @@ public class TradeLoader
 		// the villager is selling if the buy item or buyB item is an emerald - i.e. the player is giving emeralds and receiving items
 		if (isVillagerSelling(jsonRecipeObject))
 		{
-			// the sell item is the item the player is receiving
-			ItemStack sellingStack = getItemStack(jsonSellObject);
-			
-			// the sell price is the number of items the player will receive
-			PriceInfo sellPrice = (jsonBuyBObject == null ? getPriceInfo(jsonSellObject, true) : getPriceInfo(jsonSellObject, false));
-			// the buy price is the number of emeralds the player must hand over
-			PriceInfo buyPrice = (jsonBuyBObject == null ? getPriceInfo(jsonBuyObject, false) : getPriceInfo(jsonBuyBObject, false));
-			
-			
-			if (jsonBuyBObject == null)
+			if (jsonSellObject.get("id").isJsonArray())
 			{
-				trade = new VTTItemsForEmeralds(buyPrice, sellingStack, sellPrice);
+				ItemStack[] sellingStacks = getItemStackArray(jsonSellObject);
+				PriceInfo[] sellPrices = (jsonBuyBObject == null ? getPriceInfoArray(jsonSellObject, true) : getPriceInfoArray(jsonSellObject, false));
+				PriceInfo[] buyPrices = (jsonBuyBObject == null ? getPriceInfoArray(jsonBuyObject, false) : getPriceInfoArray(jsonBuyBObject, false));
+				
+				trade = new VTTRandomItemsForEmeralds(buyPrices, sellingStacks, sellPrices);
+				
 			}
 			else
 			{
-				trade = new VTTItemsAndEmeraldsForItems(getItemStack(jsonBuyObject), buyPrice, sellingStack, sellPrice);
+				// the sell item is the item the player is receiving
+				ItemStack sellingStack = getItemStack(jsonSellObject);
+				
+				// the sell price is the number of items the player will receive
+				PriceInfo sellPrice = (jsonBuyBObject == null ? getPriceInfo(jsonSellObject, true) : getPriceInfo(jsonSellObject, false));
+				// the buy price is the number of emeralds the player must hand over
+				PriceInfo buyPrice = (jsonBuyBObject == null ? getPriceInfo(jsonBuyObject, false) : getPriceInfo(jsonBuyBObject, false));
+				
+				
+				if (jsonBuyBObject == null)
+				{
+					trade = new VTTItemsForEmeralds(buyPrice, sellingStack, sellPrice);
+				}
+				else
+				{
+					trade = new VTTItemsAndEmeraldsForItems(getItemStack(jsonBuyObject), buyPrice, sellingStack, sellPrice);
+				}
 			}
+			
 		}
 		
-		if (trade != null) career.addTrade(careerLevel, trade);
+		if (trade != null)
+		{
+			trade.setChance(chance);
+			career.addTrade(careerLevel, trade);
+		}
 	}
 	
 	
@@ -245,8 +267,12 @@ public class TradeLoader
 	private static boolean isVillagerBuying(JsonObject jsonRecipeObject)
 	{	
 		// TODO what if the user wants to create trades using an item other than emeralds as currency? 
-		boolean isPlayerSelling = jsonRecipeObject.get("sell").getAsJsonObject().get("id").getAsString().equals("minecraft:emerald");
-		return isPlayerSelling;
+		try
+		{
+			if (jsonRecipeObject.get("sell").getAsJsonObject().get("id").getAsString().equals("minecraft:emerald")) return true;
+		}
+		catch(Exception ex) { }
+		return false;
 	}
 	
 	
@@ -270,9 +296,10 @@ public class TradeLoader
 	private static ItemStack getItemStack(JsonObject jsonObject)
 	{
 		
-		String resourceName = jsonObject.get("id").getAsString();
+		String id = jsonObject.get("id").getAsString();
 		
-		ItemStack stack = new ItemStack(Item.REGISTRY.getObject(new ResourceLocation(resourceName)));
+		ItemStack stack = new ItemStack(Item.REGISTRY.getObject(new ResourceLocation(id)));
+		
 		
 //		if (jsonObject.has("Count") && jsonObject.get("Count").isJsonPrimitive())
 //		{
@@ -298,6 +325,64 @@ public class TradeLoader
 		return stack;		
 	}
 	
+	private static ItemStack[] getItemStackArray(JsonObject jsonObject)
+	{
+		Gson gson = new Gson();
+		String[] ids = gson.fromJson(jsonObject.get("id").getAsJsonArray(), String[].class);
+		
+		int[] damage = new int[ids.length];  
+		if (jsonObject.has("Damage"))
+		{
+			if (jsonObject.get("Damage").isJsonArray())
+			{
+				damage = gson.fromJson(jsonObject.get("Damage").getAsJsonArray(), int[].class);
+			}
+			else
+			{
+				for ( int i = 0 ; i < damage.length ; i++ )
+				{
+					damage[i] = jsonObject.get("Damage").getAsInt();
+				}
+			}
+		}
+		
+		NBTTagCompound[] tag = null;
+		if (jsonObject.has("tag"))
+		{
+			tag = new NBTTagCompound[ids.length];
+			if (jsonObject.get("tag").isJsonArray())
+			{
+				for ( int i = 0 ; i < jsonObject.get("tag").getAsJsonArray().size() ; i++ )
+				{
+					String _tag = jsonObject.get("tag").getAsJsonArray().get(i).getAsString();
+					try { tag[i] = JsonToNBT.getTagFromJson(_tag); } catch (NBTException ex){ VillagerTradesMod.logger.catching(ex); }
+				}
+			}
+			else
+			{
+				String _tag = jsonObject.get("tag").getAsJsonObject().toString();
+				for ( int i = 0 ; i < tag.length ; i++ )
+				{
+					try { tag[i] = JsonToNBT.getTagFromJson(_tag); } catch (NBTException ex){ VillagerTradesMod.logger.catching(ex); }
+				}
+			}
+		}
+		
+		
+		
+		ItemStack[] stacks = new ItemStack[ids.length];
+		for ( int i = 0 ; i < ids.length ; i++ )
+		{
+			stacks[i] = new ItemStack(Item.REGISTRY.getObject(new ResourceLocation(ids[i])));
+			stacks[i].setItemDamage(damage[i]);
+			stacks[i].setTagCompound(tag[i]);
+		}
+
+		return stacks;
+	}
+	
+	
+	
 	private static PriceInfo getPriceInfo(JsonObject jsonObject, boolean isPlayerBuying)
 	{
 		JsonElement jsonCountElement = jsonObject.get("Count");
@@ -316,7 +401,35 @@ public class TradeLoader
 		
 	}
 	
-	
+	private static PriceInfo[] getPriceInfoArray(JsonObject jsonObject, boolean isPlayerBuying)
+	{
+		if (jsonObject.get("Count").isJsonArray())
+		{
+			JsonArray jsonCountArray = jsonObject.get("Count").getAsJsonArray();
+			
+			PriceInfo[] result = new PriceInfo[jsonCountArray.size()];
+			
+			for ( int i = 0 ; i < result.length ; i++ )
+			{
+				JsonElement jsonCountElement = jsonCountArray.get(i);
+				
+				int minValue = (jsonCountElement.isJsonObject() ? jsonCountElement.getAsJsonObject().get("min").getAsInt() : jsonCountElement.getAsInt());
+				int maxValue = (jsonCountElement.isJsonObject() ? jsonCountElement.getAsJsonObject().get("max").getAsInt() : jsonCountElement.getAsInt());
+				
+				if (isPlayerBuying)
+				{
+					result[i] = new PriceInfo(0 - maxValue, 0 - minValue);
+				}
+				else
+				{
+					result[i] = new PriceInfo(minValue, maxValue);
+				}
+			}
+
+			return result;
+		}
+		else return null;			
+	}
 	
 	
 	
@@ -385,13 +498,6 @@ public class TradeLoader
 			this.careerName = careerName;
 		}
 	}
-	
-//	public static class FileParsingException extends Exception
-//	{
-//		public FileParsingException(String fileName, Exception ex)
-//		{
-//		}
-//	}
 	
 
 }

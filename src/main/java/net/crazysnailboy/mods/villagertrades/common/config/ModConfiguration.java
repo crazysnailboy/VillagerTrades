@@ -17,9 +17,7 @@ public class ModConfiguration
 	private static ConfigEventHandler configEventHandler = new ConfigEventHandler();
 
 	
-	public static boolean loadJsonFilesFromJar;
-	public static boolean copyJsonFilesToConfig;
-	
+	public static boolean verboseLogging = false;
 	public static String[] currencyItems = new String[] { "minecraft:emerald" };
 	
 	
@@ -68,28 +66,22 @@ public class ModConfiguration
 			config.load();
 		}
 		
-		Property propLoadJsonFilesFromJar = config.get(Configuration.CATEGORY_GENERAL, "loadJsonFilesFromJar", true, "");
-		propLoadJsonFilesFromJar.setLanguageKey("options.loadJsonFilesFromJar");
-		propLoadJsonFilesFromJar.setRequiresMcRestart(true);
+		Property propVerboseLogging = config.get(Configuration.CATEGORY_GENERAL, "verboseLogging", verboseLogging, "");
+		propVerboseLogging.setLanguageKey("options.verboseLogging");
+		propVerboseLogging.setRequiresMcRestart(true);
 		
-		Property propCopyJsonFilesToConfig = config.get(Configuration.CATEGORY_GENERAL, "copyJsonFilesToConfig", true, "");
-		propCopyJsonFilesToConfig.setLanguageKey("options.copyJsonFilesToConfig");
-		propCopyJsonFilesToConfig.setRequiresMcRestart(true);
-		
-		Property propCurrencyItems = config.get(Configuration.CATEGORY_GENERAL, "excludedItems", currencyItems, "List of items which cannot be uncrafted");
-		propCurrencyItems.setLanguageKey("uncrafting.options.excludedItems");
+		Property propCurrencyItems = config.get(Configuration.CATEGORY_GENERAL, "currencyItems", currencyItems, "");
+		propCurrencyItems.setLanguageKey("options.currencyItems");
 		propCurrencyItems.setRequiresMcRestart(false);
 		
 
 		
 //		try
 //		{
-//			proploadJsonFilesFromJar.setConfigEntryClass(ModGuiConfigEntries.BooleanEntry.class);
-//			propcopyJsonFilesToConfig.setConfigEntryClass(ModGuiConfigEntries.BooleanEntry.class);
+//			propVerboseLogging.setConfigEntryClass(ModGuiConfigEntries.BooleanEntry.class);
 //			
 //			List<String> propOrderGeneral = new ArrayList<String>();
-//			propOrderGeneral.add(proploadJsonFilesFromJar.getName());
-//			propOrderGeneral.add(propcopyJsonFilesToConfig.getName());
+//			propOrderGeneral.add(propVerboseLogging.getName());
 //			config.setCategoryPropertyOrder(Configuration.CATEGORY_GENERAL, propOrderGeneral);
 //			
 //		}
@@ -98,12 +90,12 @@ public class ModConfiguration
 		
 		if (readFieldsFromConfig) 
 		{
-			loadJsonFilesFromJar = propLoadJsonFilesFromJar.getBoolean();
-			copyJsonFilesToConfig = propCopyJsonFilesToConfig.getBoolean();
+			verboseLogging = propVerboseLogging.getBoolean();
+			currencyItems = propCurrencyItems.getStringList();
 		}
 		
-		propLoadJsonFilesFromJar.set(loadJsonFilesFromJar);
-		propCopyJsonFilesToConfig.set(copyJsonFilesToConfig);
+		propVerboseLogging.set(verboseLogging);
+		propCurrencyItems.set(currencyItems);
 		
 		if (config.hasChanged()) 
 		{

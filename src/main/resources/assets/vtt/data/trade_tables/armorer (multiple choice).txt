@@ -1,0 +1,24 @@
+{ 
+	Profession: "minecraft:smith", 
+	Career:"armor",
+
+	Offers:{
+		Recipes:[
+		
+			{action:"remove", buy:{id:"minecraft:emerald"},sell:{id:"minecraft:diamond_chestplate"}, CareerLevel:3},
+		
+			{
+				action:"add", CareerLevel:3, 
+				buy:{
+					id:"minecraft:emerald",
+					Count:[{min:10,max:12},{min:16,max:19},{min:14,max:17},{min:8,max:10}]
+				},
+				sell:{
+					id:["minecraft:diamond_helmet","minecraft:diamond_chestplate","minecraft:diamond_leggings","minecraft:diamond_boots"],
+					Count:[1,1,1,1],
+					tag:{ench:"random"}
+				}
+			}
+		]
+	}
+}

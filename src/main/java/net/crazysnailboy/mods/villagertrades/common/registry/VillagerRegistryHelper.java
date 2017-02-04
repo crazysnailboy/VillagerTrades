@@ -170,10 +170,10 @@ public class VillagerRegistryHelper
 		
 		Collections.sort( professions, new Comparator<Map.Entry<Integer,String>>() 
 		{
-		    public int compare(Map.Entry<Integer,String> o1, Map.Entry<Integer,String> o2) 
-		    {
-		    	return o1.getKey() - o2.getKey();
-	        }					
+			public int compare(Map.Entry<Integer,String> o1, Map.Entry<Integer,String> o2) 
+			{
+				return o1.getKey() - o2.getKey();
+			}					
 		});
 		
 		return professions;
