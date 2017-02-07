@@ -65,7 +65,7 @@ public class CustomTrades
 			ItemStack buy1 = this.buy1.copy(); buy1.setCount(buyAmount); 
 			ItemStack sell = new ItemStack(Items.EMERALD, Math.abs(sellAmount));
 			
-			recipeList.add(new MerchantRecipe(this.buy1, new ItemStack(Items.EMERALD, sellAmount)));
+			recipeList.add(new MerchantRecipe(buy1, sell));
 		}
 	}
 	
@@ -103,8 +103,16 @@ public class CustomTrades
 			int buyAmount = this.buyPrice.getPrice(random);
 			int sellAmount = this.sellPrice.getPrice(random);
 			
+			System.out.println("buyAmount: " + buyAmount);
+			System.out.println("sellAmount: " + sellAmount);
+			
+			
 			ItemStack buy1 = new ItemStack(Items.EMERALD, buyAmount);
 			ItemStack sell = this.sell.copy(); sell.setCount(Math.abs(sellAmount));
+			
+
+			System.out.println("buy1.stackSize: " + buy1.getCount());
+			System.out.println("sell.stackSize: " + sell.getCount());
 			
 			
 			NBTTagCompound tag = sell.getTagCompound();
