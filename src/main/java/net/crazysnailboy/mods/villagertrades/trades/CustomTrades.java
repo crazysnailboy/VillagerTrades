@@ -55,17 +55,17 @@ public class CustomTrades
 		public void setChance(double chance){ this.chance = chance; }
 
 		@Override
-		public void addMerchantRecipe(IMerchant merchant, MerchantRecipeList recipeList, Random random)
+		public void modifyMerchantRecipeList(MerchantRecipeList recipeList, Random random)
 		{
 			if (chance != 1 && random.nextDouble() > chance) return; 
 			
 			int buyAmount = this.buyPrice.getPrice(random);
 			int sellAmount = this.sellPrice.getPrice(random);
 			
-			ItemStack buy1 = this.buy1.copy(); buy1.setCount(buyAmount); 
+			ItemStack buy1 = this.buy1.copy(); buy1.stackSize = buyAmount; 
 			ItemStack sell = new ItemStack(Items.EMERALD, Math.abs(sellAmount));
 			
-			recipeList.add(new MerchantRecipe(this.buy1, new ItemStack(Items.EMERALD, sellAmount)));
+			recipeList.add(new MerchantRecipe(buy1, sell));
 		}
 	}
 	
@@ -96,7 +96,7 @@ public class CustomTrades
 		public void setChance(double chance){ this.chance = chance; }
 
 		@Override
-		public void addMerchantRecipe(IMerchant merchant, MerchantRecipeList recipeList, Random random)
+		public void modifyMerchantRecipeList(MerchantRecipeList recipeList, Random random)
 		{
 			if (chance != 1 && random.nextDouble() > chance) return; 
 			
@@ -104,20 +104,20 @@ public class CustomTrades
 			int sellAmount = this.sellPrice.getPrice(random);
 			
 			ItemStack buy1 = new ItemStack(Items.EMERALD, buyAmount);
-			ItemStack sell = this.sell.copy(); sell.setCount(Math.abs(sellAmount));
+			ItemStack sell = this.sell.copy(); sell.stackSize = Math.abs(sellAmount);
 			
 			
 			NBTTagCompound tag = sell.getTagCompound();
 			
 			if (tag != null && tag.hasKey("ench") && tag.getString("ench").equals("random"))
 			{
-				sell.removeSubCompound("ench");
+				ItemStackHelper.removeSubCompound(sell, "ench");
 				sell = EnchantmentHelper.addRandomEnchantment(random, sell, 5 + random.nextInt(15), false);
 			}
 			
 			if (tag != null && tag.hasKey("Potion") && tag.getString("Potion").equals("random"))
 			{
-				sell.removeSubCompound("Potion");
+				ItemStackHelper.removeSubCompound(sell, "Potion");
 				sell = PotionUtils.addPotionToItemStack(sell, PotionType.REGISTRY.getRandomObject(random));
 			}
 			
@@ -149,7 +149,7 @@ public class CustomTrades
 		public void setChance(double chance){ this.chance = chance; }
 
 		@Override
-		public void addMerchantRecipe(IMerchant merchant, MerchantRecipeList recipeList, Random random)
+		public void modifyMerchantRecipeList(MerchantRecipeList recipeList, Random random)
 		{
 			if (chance != 1 && random.nextDouble() > chance) return; 
 
@@ -161,19 +161,19 @@ public class CustomTrades
 			int sellAmount = this.sellPrice[index].getPrice(random);
 			
 			ItemStack buy1 = new ItemStack(Items.EMERALD, buyAmount);
-			ItemStack sell = this.sell[index].copy(); sell.setCount(Math.abs(sellAmount));
+			ItemStack sell = this.sell[index].copy(); sell.stackSize = Math.abs(sellAmount);
 			
 			NBTTagCompound tag = sell.getTagCompound();
 			
 			if (tag != null && tag.hasKey("ench") && tag.getString("ench").equals("random"))
 			{
-				sell.removeSubCompound("ench");
+				ItemStackHelper.removeSubCompound(sell, "ench");
 				sell = EnchantmentHelper.addRandomEnchantment(random, sell, 5 + random.nextInt(15), false);
 			}
 			
 			if (tag != null && tag.hasKey("Potion") && tag.getString("Potion").equals("random"))
 			{
-				sell.removeSubCompound("Potion");
+				ItemStackHelper.removeSubCompound(sell, "Potion");
 				sell = PotionUtils.addPotionToItemStack(sell, PotionType.REGISTRY.getRandomObject(random));
 			}
 			
@@ -226,7 +226,7 @@ public class CustomTrades
 		public void setChance(double chance){ this.chance = chance; }
 
 		@Override
-		public void addMerchantRecipe(IMerchant merchant, MerchantRecipeList recipeList, Random random)
+		public void modifyMerchantRecipeList(MerchantRecipeList recipeList, Random random)
 		{
 			if (chance != 1 && random.nextDouble() > chance) return; 
 
@@ -234,21 +234,21 @@ public class CustomTrades
 			int buyAmount2 = this.buyPrice2.getPrice(random);
 			int sellAmount = this.sellPrice.getPrice(random);
 			
-			ItemStack buy1 = this.buy1.copy(); buy1.setCount(buyAmount1);
+			ItemStack buy1 = this.buy1.copy(); buy1.stackSize = buyAmount1;
 			ItemStack buy2 = new ItemStack(Items.EMERALD, buyAmount2);
-			ItemStack sell = this.sell.copy(); sell.setCount(sellAmount);
+			ItemStack sell = this.sell.copy(); sell.stackSize = sellAmount;
 			
 			NBTTagCompound tag = sell.getTagCompound();
 			
 			if (tag != null && tag.hasKey("ench") && tag.getString("ench").equals("random"))
 			{
-				sell.removeSubCompound("ench");
+				ItemStackHelper.removeSubCompound(sell, "ench");
 				sell = EnchantmentHelper.addRandomEnchantment(random, sell, 5 + random.nextInt(15), false);
 			}
 			
 			if (tag != null && tag.hasKey("Potion") && tag.getString("Potion").equals("random"))
 			{
-				sell.removeSubCompound("Potion");
+				ItemStackHelper.removeSubCompound(sell, "Potion");
 				sell = PotionUtils.addPotionToItemStack(sell, PotionType.REGISTRY.getRandomObject(random));
 			}
 			
@@ -257,5 +257,19 @@ public class CustomTrades
 	}
 	
 	
-
+	private static class ItemStackHelper
+	{
+		private static void removeSubCompound(ItemStack stack, String key)
+		{
+			if (stack.hasTagCompound())
+			{
+				NBTTagCompound stackTagCompound = stack.getTagCompound();
+				if (stackTagCompound != null && stackTagCompound.hasKey(key, 10))
+				{
+					stackTagCompound.removeTag(key);
+					stack.setTagCompound(stackTagCompound);
+				}
+			}
+		}
+	}
 }

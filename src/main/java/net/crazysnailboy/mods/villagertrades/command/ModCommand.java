@@ -19,7 +19,7 @@ import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerProfessio
 
 public class ModCommand implements ICommand
 {
-	
+
 	private final List<String> aliases;
 
 	
@@ -29,7 +29,7 @@ public class ModCommand implements ICommand
 		aliases.add("vtt");
 	}
 	
-	
+
 	@Override
 	public int compareTo(ICommand arg0) 
 	{
@@ -37,19 +37,19 @@ public class ModCommand implements ICommand
 	}
 
 	@Override
-	public String getName() 
+	public String getCommandName() 
 	{
 		return "vtt";
 	}
 
 	@Override
-	public String getUsage(ICommandSender sender) 
+	public String getCommandUsage(ICommandSender sender) 
 	{
 		return null;
 	}
 
 	@Override
-	public List<String> getAliases() 
+	public List<String> getCommandAliases() 
 	{
 		return this.aliases;
 	}
@@ -65,7 +65,7 @@ public class ModCommand implements ICommand
 			{
 				for ( Map.Entry<Integer,String> kvp : VillagerRegistryHelper.getProfessionIdsAndNamesSortedById() )
 				{
-					sender.sendMessage(new TextComponentString(kvp.getKey() + ": " + kvp.getValue()));
+					sender.addChatMessage(new TextComponentString(kvp.getKey() + ": " + kvp.getValue()));
 				}
 				return;
 			}
@@ -78,8 +78,8 @@ public class ModCommand implements ICommand
 					for (VillagerCareer career : new VTTVillagerProfession(profession).getCareers())
 					{
 						VTTVillagerCareer vttCareer = new VTTVillagerCareer(career);
-						sender.sendMessage(new TextComponentString(vttCareer.getId() + ": " + vttCareer.getName()));
-						sender.sendMessage(new TextComponentString("\t" + vttCareer.getCareerLevels() + " levels"));
+						sender.addChatMessage(new TextComponentString(vttCareer.getId() + ": " + vttCareer.getName()));
+						sender.addChatMessage(new TextComponentString("\t" + vttCareer.getCareerLevels() + " levels"));
 					}
 				}
 			}
@@ -90,17 +90,17 @@ public class ModCommand implements ICommand
 	@Override
 	public boolean checkPermission(MinecraftServer server, ICommandSender sender) 
 	{
-		return sender.canUseCommand(2, getName());
+		return sender.canCommandSenderUseCommand(2, getCommandName());
 	}
 
 	@Override
-	public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos targetPos) 
+	public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos pos) 
 	{
 		return null;
 	}
 
 	@Override
-	public boolean isUsernameIndex(String[] args, int index)
+	public boolean isUsernameIndex(String[] args, int index) 
 	{
 		return false;
 	}
