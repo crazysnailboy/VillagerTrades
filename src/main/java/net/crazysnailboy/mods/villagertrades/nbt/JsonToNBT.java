@@ -25,7 +25,7 @@ import net.minecraft.nbt.NBTTagString;
 
 
 /**
- * An almost direct copy of net.minecraft.nbt.JsonToNBT, but strips quotes from field names. 
+ * An almost direct copy of net.minecraft.nbt.JsonToNBT, but strips quotes from field names.
  *
  */
 public class JsonToNBT
@@ -79,12 +79,12 @@ public class JsonToNBT
 			{
 				if (c0 != 123 && c0 != 91)
 				{
-					if (c0 == 125 && (stack.isEmpty() || ((Character)stack.pop()).charValue() != 123))
+					if (c0 == 125 && (stack.isEmpty() || stack.pop().charValue() != 123))
 					{
 						throw new NBTException("Unbalanced curly brackets {}: " + str);
 					}
 
-					if (c0 == 93 && (stack.isEmpty() || ((Character)stack.pop()).charValue() != 91))
+					if (c0 == 93 && (stack.isEmpty() || stack.pop().charValue() != 91))
 					{
 						throw new NBTException("Unbalanced square brackets []: " + str);
 					}
@@ -270,12 +270,12 @@ public class JsonToNBT
 			{
 				if (c0 != 123 && c0 != 91)
 				{
-					if (c0 == 125 && (stack.isEmpty() || ((Character)stack.pop()).charValue() != 123))
+					if (c0 == 125 && (stack.isEmpty() || stack.pop().charValue() != 123))
 					{
 						throw new NBTException("Unbalanced curly brackets {}: " + str);
 					}
 
-					if (c0 == 93 && (stack.isEmpty() || ((Character)stack.pop()).charValue() != 91))
+					if (c0 == 93 && (stack.isEmpty() || stack.pop().charValue() != 91))
 					{
 						throw new NBTException("Unbalanced square brackets []: " + str);
 					}
@@ -428,6 +428,7 @@ public class JsonToNBT
 		 * Parses the JSON string contained in this object.
 		 * @return an {@link NBTBase} which can be safely cast to the type represented by this class.
 		 */
+		@Override
 		public NBTBase parse() throws NBTException
 		{
 			NBTTagCompound nbttagcompound = new NBTTagCompound();
@@ -454,6 +455,7 @@ public class JsonToNBT
 		 * Parses the JSON string contained in this object.
 		 * @return an {@link NBTBase} which can be safely cast to the type represented by this class.
 		 */
+		@Override
 		public NBTBase parse() throws NBTException
 		{
 			NBTTagList nbttaglist = new NBTTagList();
@@ -490,6 +492,7 @@ public class JsonToNBT
 		 * Parses the JSON string contained in this object.
 		 * @return an {@link NBTBase} which can be safely cast to the type represented by this class.
 		 */
+		@Override
 		public NBTBase parse() throws NBTException
 		{
 			try
@@ -543,7 +546,7 @@ public class JsonToNBT
 			if (this.jsonValue.startsWith("[") && this.jsonValue.endsWith("]"))
 			{
 				String s = this.jsonValue.substring(1, this.jsonValue.length() - 1);
-				String[] astring = (String[])Iterables.toArray(SPLITTER.split(s), String.class);
+				String[] astring = Iterables.toArray(SPLITTER.split(s), String.class);
 
 				try
 				{

@@ -22,45 +22,45 @@ public class ModCommand implements ICommand
 
 	private final List<String> aliases;
 
-	
+
 	public ModCommand()
 	{
 		aliases = new ArrayList<String>();
 		aliases.add("vtt");
 	}
-	
+
 
 	@Override
-	public int compareTo(ICommand arg0) 
+	public int compareTo(ICommand arg0)
 	{
 		return 0;
 	}
 
 	@Override
-	public String getCommandName() 
+	public String getCommandName()
 	{
 		return "vtt";
 	}
 
 	@Override
-	public String getCommandUsage(ICommandSender sender) 
+	public String getCommandUsage(ICommandSender sender)
 	{
 		return null;
 	}
 
 	@Override
-	public List<String> getCommandAliases() 
+	public List<String> getCommandAliases()
 	{
 		return this.aliases;
 	}
 
 	@Override
-	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException 
+	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
 	{
-		World world = sender.getEntityWorld(); 
-		if (!world.isRemote) 
+		World world = sender.getEntityWorld();
+		if (!world.isRemote)
 		{
-			
+
 			if (args.length == 0)
 			{
 				for ( Map.Entry<Integer,String> kvp : VillagerRegistryHelper.getProfessionIdsAndNamesSortedById() )
@@ -69,7 +69,7 @@ public class ModCommand implements ICommand
 				}
 				return;
 			}
-			
+
 			if (args.length == 2 && args[0].equals("profession"))
 			{
 				VillagerProfession profession = VillagerRegistryHelper.getProfession(args[1]);
@@ -83,24 +83,24 @@ public class ModCommand implements ICommand
 					}
 				}
 			}
-			
+
 		}
 	}
 
 	@Override
-	public boolean checkPermission(MinecraftServer server, ICommandSender sender) 
+	public boolean checkPermission(MinecraftServer server, ICommandSender sender)
 	{
 		return sender.canCommandSenderUseCommand(2, getCommandName());
 	}
 
 	@Override
-	public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos pos) 
+	public List<String> getTabCompletionOptions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos pos)
 	{
 		return null;
 	}
 
 	@Override
-	public boolean isUsernameIndex(String[] args, int index) 
+	public boolean isUsernameIndex(String[] args, int index)
 	{
 		return false;
 	}
