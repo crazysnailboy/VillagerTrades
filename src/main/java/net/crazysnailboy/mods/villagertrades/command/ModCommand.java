@@ -19,48 +19,48 @@ import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerProfessio
 
 public class ModCommand implements ICommand
 {
-	
+
 	private final List<String> aliases;
 
-	
+
 	public ModCommand()
 	{
 		aliases = new ArrayList<String>();
 		aliases.add("vtt");
 	}
-	
-	
+
+
 	@Override
-	public int compareTo(ICommand arg0) 
+	public int compareTo(ICommand arg0)
 	{
 		return 0;
 	}
 
 	@Override
-	public String getName() 
+	public String getName()
 	{
 		return "vtt";
 	}
 
 	@Override
-	public String getUsage(ICommandSender sender) 
+	public String getUsage(ICommandSender sender)
 	{
 		return null;
 	}
 
 	@Override
-	public List<String> getAliases() 
+	public List<String> getAliases()
 	{
 		return this.aliases;
 	}
 
 	@Override
-	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException 
+	public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException
 	{
-		World world = sender.getEntityWorld(); 
-		if (!world.isRemote) 
+		World world = sender.getEntityWorld();
+		if (!world.isRemote)
 		{
-			
+
 			if (args.length == 0)
 			{
 				for ( Map.Entry<Integer,String> kvp : VillagerRegistryHelper.getProfessionIdsAndNamesSortedById() )
@@ -69,7 +69,7 @@ public class ModCommand implements ICommand
 				}
 				return;
 			}
-			
+
 			if (args.length == 2 && args[0].equals("profession"))
 			{
 				VillagerProfession profession = VillagerRegistryHelper.getProfession(args[1]);
@@ -83,18 +83,18 @@ public class ModCommand implements ICommand
 					}
 				}
 			}
-			
+
 		}
 	}
 
 	@Override
-	public boolean checkPermission(MinecraftServer server, ICommandSender sender) 
+	public boolean checkPermission(MinecraftServer server, ICommandSender sender)
 	{
 		return sender.canUseCommand(2, getName());
 	}
 
 	@Override
-	public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos targetPos) 
+	public List<String> getTabCompletions(MinecraftServer server, ICommandSender sender, String[] args, BlockPos targetPos)
 	{
 		return null;
 	}
