@@ -13,6 +13,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import net.crazysnailboy.mods.villagertrades.VillagerTradesMod;
+import net.crazysnailboy.mods.villagertrades.common.config.ModConfiguration;
 import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper;
 import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper.VTTVillagerCareer;
 import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper.VTTVillagerProfession;
@@ -38,7 +39,7 @@ import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerCareer;
 import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerProfession;
 
 
-public class TradeLoader 
+public class TradeLoader
 {
 
 	/**
@@ -47,8 +48,8 @@ public class TradeLoader
 	public static void loadCustomTradeData()
 	{
 		// build the file map
-		HashMap<String, String> tradeFiles = FileUtils.createFileMap("trade_tables");
-		
+		HashMap<String, String> tradeFiles = FileUtils.createFileMap("trade_tables", ModConfiguration.loadTradesFromJar);
+
 		// iterate over the filenames in the map
 		for (String fileName : tradeFiles.keySet())
 		{
@@ -59,26 +60,26 @@ public class TradeLoader
 				// load the trades from the file contents
 				loadTradesFromFile(fileContents);
 			}
-			// write to the log if something bad happened 
+			// write to the log if something bad happened
 			catch (UnknownProfessionException ex){ VillagerTradesMod.logger.error("Unknown profession \"" + ex.professionName + "\" in \"" + fileName + "\""); }
 			catch (UnknownCareerException ex){ VillagerTradesMod.logger.error("Unknown career \"" + ex.careerName + "\" in \"" + fileName + "\""); }
 			//catch (Exception ex){ VillagerTradesMod.logger.error("Error parsing \"" + fileName + "\": " + ex.getMessage()); }
-			
+
 			catch(Exception ex){ VillagerTradesMod.logger.catching(ex); }
 		}
 	}
-	
 
-	
+
+
 	/**
-	 * Parses the contents of an individual trade file, and adds or removes the trades to or from the specified profession and career 
+	 * Parses the contents of an individual trade file, and adds or removes the trades to or from the specified profession and career
 	 * @param fileContents
 	 */
 	private static void loadTradesFromFile(String fileContents)
 	{
 		// parse the provided string as JSON
 		JsonObject jsonObject = new JsonParser().parse(fileContents).getAsJsonObject();
-		
+
 		// identify the profession and career to apply these trades to
 		String jsonProfession = jsonObject.get("Profession").getAsString();
 		String jsonCareer = jsonObject.get("Career").getAsString();
@@ -86,7 +87,7 @@ public class TradeLoader
 		// get the specified career and profession from the villager registry
 		VillagerProfession profession = VillagerRegistryHelper.getProfession(jsonProfession); if (profession == null) throw new UnknownProfessionException(jsonProfession);
 		VillagerCareer career = new VTTVillagerProfession(profession).getCareer(jsonCareer); if (career == null) throw new UnknownCareerException(jsonCareer);
-	
+
 		// iterate over the trade recipes included in the offers object
 		JsonArray jsonRecipes = jsonObject.get("Offers").getAsJsonObject().get("Recipes").getAsJsonArray();
 		for ( JsonElement jsonRecipe : jsonRecipes )
@@ -96,13 +97,13 @@ public class TradeLoader
 			// get the level this trade change applies to, and what type of change it is
 			String jsonRecipeAction = jsonRecipeObject.get("action").getAsString();
 			int jsonCareerLevel = jsonRecipeObject.get("CareerLevel").getAsInt();
-			
+
 			// add a new trade if we're supposed to add one
 			if (jsonRecipeAction.equals("add"))
 			{
 				addTradeToCareer(career, jsonCareerLevel, jsonRecipeObject);
 			}
-			
+
 			// or remove a trade if we're supposed to remove one
 			else if (jsonRecipeAction.equals("remove"))
 			{
@@ -116,16 +117,16 @@ public class TradeLoader
 				removeTradeFromCareer(career, jsonCareerLevel, jsonRecipeObject);
 				addTradeToCareer(career, jsonCareerLevel, jsonRecipeObject);
 			}
-			
+
 		}
-	
+
 		// sort them so that the buying trades appear before the selling trades for each level (like vanilla)
 		SortCareerTrades(career);
 	}
-	
-	
-	
-	
+
+
+
+
 	/**
 	 * Creates a new villager trade from the supplied JSON object and adds it to the specified career
 	 * @param career The VillagerCareer instance to add the new trade to
@@ -138,18 +139,18 @@ public class TradeLoader
 		JsonObject jsonBuyBObject = (jsonRecipeObject.has("buyB") ? jsonRecipeObject.get("buyB").getAsJsonObject() : null);
 		JsonObject jsonSellObject = jsonRecipeObject.get("sell").getAsJsonObject();
 		double chance = (jsonRecipeObject.has("chance") ? jsonRecipeObject.get("chance").getAsDouble() : 1);
-		
+
 		IVTTTradeList trade = null;
-		
+
 		// the villager is buying if the sell item is an emerald - i.e. the player is giving items and receiving emeralds
 		if (isVillagerBuying(jsonRecipeObject))
 		{
 			// the buy item is the item the player is giving to the villager
 			ItemStack buyingStack = getItemStack(jsonBuyObject);
-			
+
 			// the buy count is the number of items the player is giving to the villager in exchange for one emerald
 			PriceInfo priceInfo = getPriceInfo(jsonBuyObject, false);
-			
+
 			// create an instance of our custom emerald for items trade
 			trade = new VTTEmeraldsForItems(buyingStack, priceInfo);
 		}
@@ -162,21 +163,21 @@ public class TradeLoader
 				ItemStack[] sellingStacks = getItemStackArray(jsonSellObject);
 				PriceInfo[] sellPrices = (jsonBuyBObject == null ? getPriceInfoArray(jsonSellObject, true) : getPriceInfoArray(jsonSellObject, false));
 				PriceInfo[] buyPrices = (jsonBuyBObject == null ? getPriceInfoArray(jsonBuyObject, false) : getPriceInfoArray(jsonBuyBObject, false));
-				
+
 				trade = new VTTRandomItemsForEmeralds(buyPrices, sellingStacks, sellPrices);
-				
+
 			}
 			else
 			{
 				// the sell item is the item the player is receiving
 				ItemStack sellingStack = getItemStack(jsonSellObject);
-				
+
 				// the sell price is the number of items the player will receive
 				PriceInfo sellPrice = (jsonBuyBObject == null ? getPriceInfo(jsonSellObject, true) : getPriceInfo(jsonSellObject, false));
 				// the buy price is the number of emeralds the player must hand over
 				PriceInfo buyPrice = (jsonBuyBObject == null ? getPriceInfo(jsonBuyObject, false) : getPriceInfo(jsonBuyBObject, false));
-				
-				
+
+
 				if (jsonBuyBObject == null)
 				{
 					trade = new VTTItemsForEmeralds(buyPrice, sellingStack, sellPrice);
@@ -186,17 +187,17 @@ public class TradeLoader
 					trade = new VTTItemsAndEmeraldsForItems(getItemStack(jsonBuyObject), buyPrice, sellingStack, sellPrice);
 				}
 			}
-			
+
 		}
-		
+
 		if (trade != null)
 		{
 			trade.setChance(chance);
 			career.addTrade(careerLevel, trade);
 		}
 	}
-	
-	
+
+
 	/**
 	 * Removes a villager trade from the specified career by matching against the supplied JSON object
 	 * @param career The VillagerCareer instance to remove the trade from
@@ -207,22 +208,22 @@ public class TradeLoader
 	{
 		JsonObject jsonBuyObject = jsonRecipeObject.get("buy").getAsJsonObject();
 		JsonObject jsonSellObject = jsonRecipeObject.get("sell").getAsJsonObject();
-		
-		
+
+
 		List<ITradeList> trades = new VTTVillagerCareer(career).getTrades(careerLevel);
 		Iterator<ITradeList> iterator = trades.iterator();
-		
-		
+
+
 		// if the sell item is an emerald, the player is giving items and receiving emeralds
 		if (isVillagerBuying(jsonRecipeObject))
 		{
 			// the buy item is the item the player is giving to the villager
 			ItemStack stack = getItemStack(jsonBuyObject);
-			
+
 			while (iterator.hasNext())
 			{
 				ITradeList trade = iterator.next();
-				
+
 				ITradeHandler handler = TradeHandlers.tradeHandlers.get(trade.getClass());
 				if (handler != null && handler instanceof VillagerBuysItemsHandler)
 				{
@@ -233,19 +234,19 @@ public class TradeLoader
 					}
 				}
 			}
-			
+
 		}
-		
+
 		// if the buy item is an emerald, the player is giving emeralds and receiving items
 		if (isVillagerSelling(jsonRecipeObject))
 		{
 			// the sell item is the item the player is receiving
 			ItemStack stack = getItemStack(jsonSellObject);
-			
+
 			while (iterator.hasNext())
-			{					
+			{
 				ITradeList trade = iterator.next();
-				
+
 				ITradeHandler handler = TradeHandlers.tradeHandlers.get(trade.getClass());
 				if (handler != null && handler instanceof VillagerSellsItemsHandler)
 				{
@@ -256,17 +257,17 @@ public class TradeLoader
 					}
 				}
 			}
-			
+
 		}
 	}
-	
-	
+
+
 	/**
 	 * Determines whether the specified trade involves the villager buying items for emeralds by checking whether the sell item is an emerald
 	 */
 	private static boolean isVillagerBuying(JsonObject jsonRecipeObject)
-	{	
-		// TODO what if the user wants to create trades using an item other than emeralds as currency? 
+	{
+		// TODO what if the user wants to create trades using an item other than emeralds as currency?
 		try
 		{
 			if (jsonRecipeObject.get("sell").getAsJsonObject().get("id").getAsString().equals("minecraft:emerald")) return true;
@@ -274,14 +275,14 @@ public class TradeLoader
 		catch(Exception ex) { }
 		return false;
 	}
-	
-	
+
+
 	/**
 	 * Determines whether the current trade involves the villager selling items for emeralds by checking whether the buy or buyB item is an emerald
 	 */
 	private static boolean isVillagerSelling(JsonObject jsonRecipeObject)
 	{
-		// TODO what if the user wants to create trades using an item other than emeralds as currency? 
+		// TODO what if the user wants to create trades using an item other than emeralds as currency?
 		try
 		{
 			if (jsonRecipeObject.get("buy").getAsJsonObject().get("id").getAsString().equals("minecraft:emerald")) return true;
@@ -290,47 +291,47 @@ public class TradeLoader
 		catch(Exception ex) { }
 		return false;
 	}
-	
 
-	
+
+
 	private static ItemStack getItemStack(JsonObject jsonObject)
 	{
-		
+
 		String id = jsonObject.get("id").getAsString();
-		
+
 		ItemStack stack = new ItemStack(Item.REGISTRY.getObject(new ResourceLocation(id)));
-		
-		
+
+
 //		if (jsonObject.has("Count") && jsonObject.get("Count").isJsonPrimitive())
 //		{
 //			stack.setCount(jsonObject.get("Count").getAsInt());
 //		}
-		
+
 		if (jsonObject.has("Damage"))
 		{
 			stack.setItemDamage(jsonObject.get("Damage").getAsInt());
 		}
-		
+
 		if (jsonObject.has("tag"))
 		{
-			try 
+			try
 			{
 				String jsonString = jsonObject.get("tag").getAsJsonObject().toString();
 				NBTTagCompound compound = JsonToNBT.getTagFromJson(jsonString);
 				stack.setTagCompound(compound);
-			} 
-			catch (NBTException ex){ VillagerTradesMod.logger.catching(ex); } 
+			}
+			catch (NBTException ex){ VillagerTradesMod.logger.catching(ex); }
 		}
-		
-		return stack;		
+
+		return stack;
 	}
-	
+
 	private static ItemStack[] getItemStackArray(JsonObject jsonObject)
 	{
 		Gson gson = new Gson();
 		String[] ids = gson.fromJson(jsonObject.get("id").getAsJsonArray(), String[].class);
-		
-		int[] damage = new int[ids.length];  
+
+		int[] damage = new int[ids.length];
 		if (jsonObject.has("Damage"))
 		{
 			if (jsonObject.get("Damage").isJsonArray())
@@ -345,7 +346,7 @@ public class TradeLoader
 				}
 			}
 		}
-		
+
 		NBTTagCompound[] tag = null;
 		if (jsonObject.has("tag"))
 		{
@@ -367,9 +368,9 @@ public class TradeLoader
 				}
 			}
 		}
-		
-		
-		
+
+
+
 		ItemStack[] stacks = new ItemStack[ids.length];
 		for ( int i = 0 ; i < ids.length ; i++ )
 		{
@@ -380,16 +381,16 @@ public class TradeLoader
 
 		return stacks;
 	}
-	
-	
-	
+
+
+
 	private static PriceInfo getPriceInfo(JsonObject jsonObject, boolean isPlayerBuying)
 	{
 		JsonElement jsonCountElement = jsonObject.get("Count");
-		
+
 		int minValue = (jsonCountElement.isJsonObject() ? jsonCountElement.getAsJsonObject().get("min").getAsInt() : jsonCountElement.getAsInt());
 		int maxValue = (jsonCountElement.isJsonObject() ? jsonCountElement.getAsJsonObject().get("max").getAsInt() : jsonCountElement.getAsInt());
-		
+
 		if (isPlayerBuying)
 		{
 			return new PriceInfo(0 - maxValue, 0 - minValue);
@@ -398,24 +399,24 @@ public class TradeLoader
 		{
 			return new PriceInfo(minValue, maxValue);
 		}
-		
+
 	}
-	
+
 	private static PriceInfo[] getPriceInfoArray(JsonObject jsonObject, boolean isPlayerBuying)
 	{
 		if (jsonObject.get("Count").isJsonArray())
 		{
 			JsonArray jsonCountArray = jsonObject.get("Count").getAsJsonArray();
-			
+
 			PriceInfo[] result = new PriceInfo[jsonCountArray.size()];
-			
+
 			for ( int i = 0 ; i < result.length ; i++ )
 			{
 				JsonElement jsonCountElement = jsonCountArray.get(i);
-				
+
 				int minValue = (jsonCountElement.isJsonObject() ? jsonCountElement.getAsJsonObject().get("min").getAsInt() : jsonCountElement.getAsInt());
 				int maxValue = (jsonCountElement.isJsonObject() ? jsonCountElement.getAsJsonObject().get("max").getAsInt() : jsonCountElement.getAsInt());
-				
+
 				if (isPlayerBuying)
 				{
 					result[i] = new PriceInfo(0 - maxValue, 0 - minValue);
@@ -428,11 +429,11 @@ public class TradeLoader
 
 			return result;
 		}
-		else return null;			
+		else return null;
 	}
-	
-	
-	
+
+
+
 	/**
 	 * Sorts the trades at each level of a career so that the buying trades appear before the selling trades
 	 * @param career The VillagerCareer instance on which to sort the trades
@@ -446,14 +447,15 @@ public class TradeLoader
 		for ( List<ITradeList> levelTrades : trades )
 		{
 			// sort the trades using a comparator
-			Collections.sort(levelTrades, new Comparator<ITradeList>() 
+			Collections.sort(levelTrades, new Comparator<ITradeList>()
 			{
+				@Override
 				public int compare(ITradeList tradeA, ITradeList tradeB)
 				{
 					// get the appropriate trade handler for the two trades being compared
 					ITradeHandler handlerA = TradeHandlers.tradeHandlers.get(tradeA.getClass());
 					ITradeHandler handlerB = TradeHandlers.tradeHandlers.get(tradeB.getClass());
-					
+
 					if (handlerA != null && handlerB != null)
 					{
 						// if one is a buying trade and the other a selling trade, put the buying trade first
@@ -470,34 +472,34 @@ public class TradeLoader
 					return 0;
 				}
 
-			});			
-			
+			});
+
 		}
-		
+
 	}
-	
-	
-	
-	
+
+
+
+
 	public static class UnknownProfessionException extends RuntimeException
 	{
 		public String professionName;
-		
+
 		public UnknownProfessionException(String professionName)
 		{
 			this.professionName = professionName;
 		}
 	}
-	
+
 	public static class UnknownCareerException extends RuntimeException
 	{
 		public String careerName;
-		
+
 		public UnknownCareerException(String careerName)
 		{
 			this.careerName = careerName;
 		}
 	}
-	
+
 
 }
