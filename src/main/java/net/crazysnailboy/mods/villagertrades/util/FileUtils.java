@@ -30,29 +30,32 @@ import net.minecraftforge.fml.common.Loader;
 
 public class FileUtils
 {
-	
-	
+
+
 	/**
 	 * Scans the various locations for .json files and creates a map of the filenames and file contents
 	 * @param folderName The bottom level folder to be scanned in each location
 	 * @return a HashMap with the filename as the key and the file contents as the value
 	 */
-	public static HashMap<String, String> createFileMap(String folderName)
+	public static HashMap<String, String> createFileMap(String folderName, boolean loadFilesFromJar)
 	{
 		// initialise a hashmap which will contain the file names as keys and the file contents as values
 		HashMap<String, String> fileMap = new HashMap<String, String>();
-		
-		// load the villagers from the jar's assets folder
-		for ( String fileName : getFileNamesFromModFolder("/assets/" + VillagerTradesMod.MODID + "/data/" + folderName + "/"))
+
+		if (loadFilesFromJar)
 		{
-			String fileContents = readFileContentsFromMod("assets/" + VillagerTradesMod.MODID + "/data/" + folderName + "/" + fileName);
-			fileMap.put(fileName, fileContents);
+			// load the villagers from the jar's assets folder
+			for ( String fileName : getFileNamesFromModFolder("/assets/" + VillagerTradesMod.MODID + "/data/" + folderName + "/"))
+			{
+				String fileContents = readFileContentsFromMod("assets/" + VillagerTradesMod.MODID + "/data/" + folderName + "/" + fileName);
+				fileMap.put(fileName, fileContents);
+			}
 		}
-		
+
 		// load from config folder
 		File configFolder = new File((Loader.instance().getConfigDir().getAbsolutePath() + "/" + VillagerTradesMod.MODID).replace(File.separatorChar, '/').replace("/./", "/"));
 		if (!configFolder.exists()) configFolder.mkdirs();
-		
+
 		File villagersFolder = new File(configFolder, folderName);
 		if (villagersFolder.exists())
 		{
@@ -73,8 +76,8 @@ public class FileUtils
 
 		return fileMap;
 	}
-	
-	
+
+
 	private static List<String> getFileNamesFromFolder(Path folderPath)
 	{
 		List<String> fileNames = new ArrayList<String>();
@@ -89,10 +92,10 @@ public class FileUtils
 			walk.close();
 		}
 		catch(Exception ex){ VillagerTradesMod.logger.catching(ex); }
-		return fileNames;	
+		return fileNames;
 	}
-	
-	
+
+
 	private static List<String> getFileNamesFromModFolder(String resourceFolder)
 	{
 		List<String> fileNames = new ArrayList<String>();
@@ -100,16 +103,16 @@ public class FileUtils
 		{
 			URI resourceUri = VillagerTradesMod.class.getResource(resourceFolder).toURI();
 			Path resourcePath;
-			if (resourceUri.getScheme().equals("jar")) 
+			if (resourceUri.getScheme().equals("jar"))
 			{
 				FileSystem fileSystem = FileSystems.newFileSystem(resourceUri, Collections.<String, Object>emptyMap());
 				resourcePath = fileSystem.getPath(resourceFolder);
-			} 
-			else 
+			}
+			else
 			{
 				resourcePath = Paths.get(resourceUri);
 			}
-			
+
 			Stream<Path> walk = Files.walk(resourcePath, 1);
 			for (Iterator<Path> it = walk.iterator(); it.hasNext();)
 			{
@@ -119,9 +122,9 @@ public class FileUtils
 			walk.close();
 		}
 		catch(Exception ex){ VillagerTradesMod.logger.catching(ex); }
-		return fileNames;	
+		return fileNames;
 	}
-	
+
 
 	private static String readFileContents(File file)
 	{
@@ -130,17 +133,17 @@ public class FileUtils
 		{
 			InputStream stream = new FileInputStream(file);
 			BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
-			
+
 			fileContents = IOUtils.toString(stream);
-			
+
 			reader.close();
 			stream.close();
-			
+
 		}
 		catch(Exception ex){ VillagerTradesMod.logger.catching(ex); }
 		return fileContents;
 	}
-	
+
 	private static String readFileContentsFromMod(String fileName)
 	{
 		String fileContents = "";
@@ -148,30 +151,30 @@ public class FileUtils
 		{
 			InputStream stream = VillagerTradesMod.INSTANCE.getClass().getClassLoader().getResourceAsStream(fileName);
 			BufferedReader reader = new BufferedReader(new InputStreamReader(stream, StandardCharsets.UTF_8));
-			
+
 			fileContents = IOUtils.toString(stream);
-			
+
 			reader.close();
 			stream.close();
-			
+
 		}
 		catch(Exception ex){ VillagerTradesMod.logger.catching(ex); }
 		return fileContents;
 	}
-	
-	
+
+
 	private static void writeFile(File outputFile, String fileContents)
 	{
-		try 
+		try
 		{
 			FileOutputStream outputStream = new FileOutputStream(outputFile);
 			BufferedWriter streamWriter = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
-			
+
 			streamWriter.write(fileContents);
-			
+
 			streamWriter.close();
 			outputStream.close();
-			
+
 		}
 		catch(Exception ex){ VillagerTradesMod.logger.catching(ex); }
 	}
