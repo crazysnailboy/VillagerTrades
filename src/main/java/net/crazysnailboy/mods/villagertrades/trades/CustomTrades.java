@@ -103,17 +103,8 @@ public class CustomTrades
 			int buyAmount = this.buyPrice.getPrice(random);
 			int sellAmount = this.sellPrice.getPrice(random);
 
-			System.out.println("buyAmount: " + buyAmount);
-			System.out.println("sellAmount: " + sellAmount);
-
-
 			ItemStack buy1 = new ItemStack(Items.EMERALD, buyAmount);
 			ItemStack sell = this.sell.copy(); sell.setCount(Math.abs(sellAmount));
-
-
-			System.out.println("buy1.stackSize: " + buy1.getCount());
-			System.out.println("sell.stackSize: " + sell.getCount());
-
 
 			NBTTagCompound tag = sell.getTagCompound();
 
