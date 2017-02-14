@@ -347,7 +347,7 @@ public class TradeLoader
 			}
 		}
 
-		NBTTagCompound[] tag = null;
+		NBTTagCompound[] tag = new NBTTagCompound[ids.length];
 		if (jsonObject.has("tag"))
 		{
 			tag = new NBTTagCompound[ids.length];

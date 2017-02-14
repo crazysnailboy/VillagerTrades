@@ -105,7 +105,6 @@ public class CustomTrades
 			ItemStack buy1 = new ItemStack(Items.EMERALD, buyAmount);
 			ItemStack sell = this.sell.copy(); sell.stackSize = Math.abs(sellAmount);
 
-
 			NBTTagCompound tag = sell.getTagCompound();
 
 			if (tag != null && tag.hasKey("ench") && tag.getString("ench").equals("random"))
