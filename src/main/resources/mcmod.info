@@ -4,7 +4,7 @@
 	"description": "Like loot tables, but for villager trading",
 	"version": "${version}",
 	"mcversion": "${mcversion}",
-	"url": "https://minecraft.curseforge.com/projects/villager-trade-tables/files",
+	"url": "https://minecraft.curseforge.com/projects/villager-trade-tables",
 	"updateUrl": "",
 	"authorList": ["crazysnailboy"],
 	"credits": "",
