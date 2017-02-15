@@ -11,6 +11,7 @@ import java.io.OutputStreamWriter;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystem;
+import java.nio.file.FileSystemAlreadyExistsException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -105,7 +106,15 @@ public class FileUtils
 			Path resourcePath;
 			if (resourceUri.getScheme().equals("jar"))
 			{
-				FileSystem fileSystem = FileSystems.newFileSystem(resourceUri, Collections.<String, Object>emptyMap());
+				FileSystem fileSystem;
+				try
+				{
+					fileSystem = FileSystems.newFileSystem(resourceUri, Collections.<String, Object>emptyMap());
+				}
+				catch (FileSystemAlreadyExistsException ex)
+				{
+					fileSystem = FileSystems.getFileSystem(resourceUri); 
+				}
 				resourcePath = fileSystem.getPath(resourceFolder);
 			}
 			else
