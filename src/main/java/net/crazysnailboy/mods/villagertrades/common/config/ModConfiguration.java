@@ -31,8 +31,8 @@ public class ModConfiguration
 
 	private static void loadConfigFromFile()
 	{
-		loadVillagersFromJar = config.getBoolean("loadVillagersFromJar", Configuration.CATEGORY_GENERAL, false, "");
-		loadTradesFromJar = config.getBoolean("loadTradesFromJar", Configuration.CATEGORY_GENERAL, false, "");
+		loadVillagersFromJar = config.getBoolean("loadVillagersFromJar", Configuration.CATEGORY_GENERAL, loadVillagersFromJar, "");
+		loadTradesFromJar = config.getBoolean("loadTradesFromJar", Configuration.CATEGORY_GENERAL, loadTradesFromJar, "");
 	}
 
 }
