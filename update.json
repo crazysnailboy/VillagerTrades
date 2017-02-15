@@ -1,20 +1,23 @@
 {
 	"homepage": "https://github.com/crazysnailboy/VillagerTrades/releases",
 	"promos": {
-		"1.11.2-latest": "0.5",
-		"1.11.2-recommended": "0.5",
-		"1.11-latest": "0.5",
-		"1.11-recommended": "0.5",
-		"1.10.2-latest": "0.5",
-		"1.10.2-recommended": "0.5"
+		"1.11.2-latest": "0.5.1",
+		"1.11.2-recommended": "0.5.1",
+		"1.11-latest": "0.5.1",
+		"1.11-recommended": "0.5.1",
+		"1.10.2-latest": "0.5.1",
+		"1.10.2-recommended": "0.5.1"
 	},
 	"1.11.2": {
+		"0.5.1": "fixed a bug with json files not being copied to config folder",
 		"0.5": ""
 	},
 	"1.11": {
+		"0.5.1": "fixed a bug with json files not being copied to config folder",
 		"0.5": ""
 	},
 	"1.10.2": {
+		"0.5.1": "fixed a bug with json files not being copied to config folder",
 		"0.5": ""
 	}
 }
