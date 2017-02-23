@@ -16,7 +16,7 @@
 			{action:"add", buy:{id:"minecraft:spider_eye",Count:{min:12,max:16}},sell:{id:"minecraft:emerald",Count:1}, CareerLevel:2},
 			{action:"add", buy:{id:"minecraft:emerald",Count:{min:3,max:5}},sell:{id:"minecraft:magma_cream",Count:1}, CareerLevel:2},
 			{action:"add", buy:{id:"minecraft:emerald",Count:{min:6,max:8}},sell:{id:"minecraft:ghast_tear",Count:1}, CareerLevel:2},
-			{action:"add", buy:{id:"minecraft:emerald",Count:{min:4,max:6}},sell:{id:"minecraft:ermented_spider_eye",Count:{min:2,max:3}}, CareerLevel:2},
+			{action:"add", buy:{id:"minecraft:emerald",Count:{min:4,max:6}},sell:{id:"minecraft:fermented_spider_eye",Count:{min:2,max:3}}, CareerLevel:2},
 			
 			{action:"add", buy:{id:"minecraft:emerald",Count:{min:3,max:5}},sell:{id:"minecraft:potion",Count:1,tag:{Potion:"random"}}, CareerLevel:3},
 			{action:"add", buy:{id:"minecraft:emerald",Count:{min:3,max:5}},sell:{id:"minecraft:tipped_arrow",Count:{min:8,max:16},tag:{Potion:"random"}}, CareerLevel:3}
