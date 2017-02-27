@@ -35,6 +35,7 @@ public class VillagerTradesMod
 	public void preInit(FMLPreInitializationEvent event)
 	{
 		ModConfiguration.preInit();
+		VillagerLoader.loadCustomVillagerData();
 	}
 
 	@EventHandler
@@ -45,7 +46,6 @@ public class VillagerTradesMod
 	@EventHandler
 	public void postInit(FMLPostInitializationEvent event)
 	{
-		VillagerLoader.loadCustomVillagerData();
 		TradeLoader.loadCustomTradeData();
 	}
 
