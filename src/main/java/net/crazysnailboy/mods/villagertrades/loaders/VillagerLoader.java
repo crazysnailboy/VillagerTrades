@@ -1,6 +1,11 @@
 package net.crazysnailboy.mods.villagertrades.loaders;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -26,6 +31,7 @@ public class VillagerLoader
 	{
 		// build the file map
 		HashMap<String, String> villagerFiles = FileUtils.createFileMap("villagers", ModConfiguration.loadVillagersFromJar);
+		sortVillagers(villagerFiles);
 
 		// iterate over the filenames in the map
 		for (String fileName : villagerFiles.keySet())
@@ -41,6 +47,35 @@ public class VillagerLoader
 			catch (Exception ex){ VillagerTradesMod.logger.error("Error parsing \"" + fileName + "\": " + ex.getMessage()); }
 		}
 	}
+
+
+
+	private static void sortVillagers(HashMap<String, String> villagerFiles)
+	{
+
+		List<Map.Entry<String, String>> list = new LinkedList<Map.Entry<String, String>>( villagerFiles.entrySet() );
+
+		Collections.sort(list, new Comparator<Map.Entry<String, String>>() {
+
+			@Override
+			public int compare(Map.Entry<String, String> o1, Map.Entry<String, String> o2)
+			{
+				JsonObject j1 = new JsonParser().parse(o1.getValue()).getAsJsonObject();
+				JsonObject j2 = new JsonParser().parse(o2.getValue()).getAsJsonObject();
+
+				JsonObject p1 = j1.get("profession").getAsJsonObject();
+				JsonObject p2 = j2.get("profession").getAsJsonObject();
+
+				int id1 = (p1.has("id") ? p1.get("id").getAsInt() : 0);
+				int id2 = (p2.has("id") ? p2.get("id").getAsInt() : 0);
+
+				return (id2 - id1);
+			}
+
+		});
+
+	}
+
 
 
 	private static void loadVillagerFromFile(String fileContents)
