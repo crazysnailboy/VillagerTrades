@@ -2,6 +2,8 @@ package net.crazysnailboy.mods.villagertrades.trades;
 
 import java.util.Random;
 
+import net.minecraft.enchantment.Enchantment;
+import net.minecraft.enchantment.EnchantmentData;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.passive.EntityVillager;
@@ -11,6 +13,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionType;
 import net.minecraft.potion.PotionUtils;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 
@@ -21,8 +24,6 @@ public class CustomTrades
 	{
 		public abstract void setChance(double chance);
 	}
-
-
 
 
 	/**
@@ -110,13 +111,37 @@ public class CustomTrades
 
 			if (tag != null && tag.hasKey("ench") && tag.getString("ench").equals("random"))
 			{
-				sell.removeSubCompound("ench");
-				sell = EnchantmentHelper.addRandomEnchantment(random, sell, 5 + random.nextInt(15), false);
+				tag.removeTag("ench");
+				sell.setTagCompound(tag);
+
+				if (sell.getItem() == Items.ENCHANTED_BOOK)
+				{
+					Enchantment enchantment = (Enchantment)Enchantment.REGISTRY.getRandomObject(random);
+					int enchLevel = MathHelper.getInt(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
+
+					sell = Items.ENCHANTED_BOOK.getEnchantedItemStack(new EnchantmentData(enchantment, enchLevel));
+
+					int buyPrice = 2 + random.nextInt(5 + enchLevel * 10) + 3 * enchLevel;
+					if (enchantment.isTreasureEnchantment()) buyPrice *= 2;
+
+					int buyPriceMin = Math.min(this.buyPrice.getFirst(), this.buyPrice.getSecond());
+					int buyPriceMax = Math.max(this.buyPrice.getFirst(), this.buyPrice.getSecond());
+
+					if (buyPrice < buyPriceMin) buyPrice = buyPriceMin;
+					if (buyPrice > buyPriceMax) buyPrice = buyPriceMax;
+
+					buy1.setCount(buyPrice);
+				}
+				else
+				{
+					sell = EnchantmentHelper.addRandomEnchantment(random, sell, 5 + random.nextInt(15), false);
+				}
 			}
 
 			if (tag != null && tag.hasKey("Potion") && tag.getString("Potion").equals("random"))
 			{
-				sell.removeSubCompound("Potion");
+				tag.removeTag("Potion");
+				sell.setTagCompound(tag);
 				sell = PotionUtils.addPotionToItemStack(sell, PotionType.REGISTRY.getRandomObject(random));
 			}
 
@@ -166,25 +191,43 @@ public class CustomTrades
 
 			if (tag != null && tag.hasKey("ench") && tag.getString("ench").equals("random"))
 			{
-				sell.removeSubCompound("ench");
-				sell = EnchantmentHelper.addRandomEnchantment(random, sell, 5 + random.nextInt(15), false);
+				tag.removeTag("ench");
+				sell.setTagCompound(tag);
+
+				if (sell.getItem() == Items.ENCHANTED_BOOK)
+				{
+					Enchantment enchantment = (Enchantment)Enchantment.REGISTRY.getRandomObject(random);
+					int enchLevel = MathHelper.getInt(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
+
+					sell = Items.ENCHANTED_BOOK.getEnchantedItemStack(new EnchantmentData(enchantment, enchLevel));
+
+					int buyPrice = 2 + random.nextInt(5 + enchLevel * 10) + 3 * enchLevel;
+					if (enchantment.isTreasureEnchantment()) buyPrice *= 2;
+
+					int buyPriceMin = Math.min(this.buyPrice[index].getFirst(), this.buyPrice[index].getSecond());
+					int buyPriceMax = Math.max(this.buyPrice[index].getFirst(), this.buyPrice[index].getSecond());
+
+					if (buyPrice < buyPriceMin) buyPrice = buyPriceMin;
+					if (buyPrice > buyPriceMax) buyPrice = buyPriceMax;
+
+					buy1.setCount(buyPrice);
+				}
+				else
+				{
+					sell = EnchantmentHelper.addRandomEnchantment(random, sell, 5 + random.nextInt(15), false);
+				}
 			}
 
 			if (tag != null && tag.hasKey("Potion") && tag.getString("Potion").equals("random"))
 			{
-				sell.removeSubCompound("Potion");
+				tag.removeTag("Potion");
+				sell.setTagCompound(tag);
 				sell = PotionUtils.addPotionToItemStack(sell, PotionType.REGISTRY.getRandomObject(random));
 			}
 
 			recipeList.add(new MerchantRecipe(buy1, sell));
-
-
 		}
-
-
 	}
-
-
 
 
 	/**
@@ -241,20 +284,42 @@ public class CustomTrades
 
 			if (tag != null && tag.hasKey("ench") && tag.getString("ench").equals("random"))
 			{
-				sell.removeSubCompound("ench");
-				sell = EnchantmentHelper.addRandomEnchantment(random, sell, 5 + random.nextInt(15), false);
+				tag.removeTag("ench");
+				sell.setTagCompound(tag);
+
+				if (sell.getItem() == Items.ENCHANTED_BOOK)
+				{
+					Enchantment enchantment = (Enchantment)Enchantment.REGISTRY.getRandomObject(random);
+					int enchLevel = MathHelper.getInt(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
+
+					sell = Items.ENCHANTED_BOOK.getEnchantedItemStack(new EnchantmentData(enchantment, enchLevel));
+
+					int buyPrice = 2 + random.nextInt(5 + enchLevel * 10) + 3 * enchLevel;
+					if (enchantment.isTreasureEnchantment()) buyPrice *= 2;
+
+					int buyPriceMin = Math.min(this.buyPrice2.getFirst(), this.buyPrice2.getSecond());
+					int buyPriceMax = Math.max(this.buyPrice2.getFirst(), this.buyPrice2.getSecond());
+
+					if (buyPrice < buyPriceMin) buyPrice = buyPriceMin;
+					if (buyPrice > buyPriceMax) buyPrice = buyPriceMax;
+
+					buy2.setCount(buyPrice);
+				}
+				else
+				{
+					sell = EnchantmentHelper.addRandomEnchantment(random, sell, 5 + random.nextInt(15), false);
+				}
 			}
 
 			if (tag != null && tag.hasKey("Potion") && tag.getString("Potion").equals("random"))
 			{
-				sell.removeSubCompound("Potion");
+				tag.removeTag("Potion");
+				sell.setTagCompound(tag);
 				sell = PotionUtils.addPotionToItemStack(sell, PotionType.REGISTRY.getRandomObject(random));
 			}
 
 			recipeList.add(new MerchantRecipe(buy1, buy2, sell));
 		}
 	}
-
-
 
 }
