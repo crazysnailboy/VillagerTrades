@@ -1,0 +1,11 @@
+{
+	profession: {
+		name: "minecraft:nitwit",
+		id: 5,
+		texture: "minecraft:textures/entity/villager/villager.png",
+		zombieTexture: "minecraft:textures/entity/zombie_villager/zombie_villager.png"
+	},
+	careers: [
+		"nitwit"
+	]
+}
