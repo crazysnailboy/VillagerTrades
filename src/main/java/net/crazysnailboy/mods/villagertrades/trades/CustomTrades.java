@@ -2,6 +2,7 @@ package net.crazysnailboy.mods.villagertrades.trades;
 
 import java.util.Random;
 
+import net.crazysnailboy.mods.villagertrades.loaders.TradeLoader.ItemStacksAndPrices;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentData;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -19,305 +20,121 @@ import net.minecraft.village.MerchantRecipeList;
 public class CustomTrades
 {
 
-	public static interface IVTTTradeList extends EntityVillager.ITradeList
+	public static class VTTVillagerTradeBase implements EntityVillager.ITradeList
 	{
-		public abstract void setChance(double chance);
+		private double chance;
+
+		private ItemStacksAndPrices buy1;
+		private ItemStacksAndPrices buy2;
+		private ItemStacksAndPrices sell;
+
+
+		public VTTVillagerTradeBase(ItemStacksAndPrices buy1, ItemStacksAndPrices buy2, ItemStacksAndPrices sell, double chance)
+		{
+			this.chance = chance;
+			this.buy1 = buy1;
+			this.buy2 = buy2;
+			this.sell = sell;
+		}
+
+
+		@Override
+		public void modifyMerchantRecipeList(MerchantRecipeList recipeList, Random random)
+		{
+			if (chance != 1 && random.nextDouble() > chance) return;
+
+			// choose random index values to use to retrieve elements from the itemstacks and prices collections
+			int buyIndex1 = random.nextInt(buy1.getItemStacks().size());
+			// if the buy2 or sell collections are the same size as the buy1, use the buy1 index
+			// otherwise use a random index based on that collection's size
+			int buyIndex2 = (this.buy2 != null ? (buy1.getItemStacks().size() == buy2.getItemStacks().size() ? buyIndex1 : random.nextInt(buy2.getItemStacks().size())) : Short.MIN_VALUE);
+			int sellIndex = (buy1.getItemStacks().size() == sell.getItemStacks().size() ? buyIndex1 : random.nextInt(sell.getItemStacks().size()));
+
+			// choose a random number of items to apply to each itemstack within the bounds of the priceinfo values
+			int buyAmount1 = this.buy1.getPrices().get(buyIndex1).getPrice(random);
+			int buyAmount2 = (this.buy2 != null ? this.buy2.getPrices().get(buyIndex2).getPrice(random) : Short.MIN_VALUE);
+			int sellAmount = this.sell.getPrices().get(sellIndex).getPrice(random);
+
+			// copy itemstacks from the collections and apply the appropriate stack size to them
+			ItemStack buyStack1 = this.buy1.getItemStacks().get(buyIndex1).copy(); buyStack1.stackSize = buyAmount1;
+			ItemStack buyStack2 = (this.buy2 != null ? this.buy2.getItemStacks().get(buyIndex2).copy() : null); if (buyStack2 != null) buyStack2.stackSize = buyAmount2;
+			ItemStack sellStack = this.sell.getItemStacks().get(sellIndex).copy(); sellStack.stackSize = sellAmount;
+
+			// examine any nbt data present on the sell stack to see whether we should apply random effects
+			NBTTagCompound tag = sellStack.getTagCompound();
+
+			// if the nbt data specifies a random enchantment
+			if (tag != null && tag.hasKey("ench") && tag.getString("ench").equals("random"))
+			{
+				// remove the random enchantment sub compound from the nbt tag
+				tag.removeTag("ench");
+				sellStack.setTagCompound(tag);
+
+				// apply random enchantments to the item being sold
+				if (sellStack.getItem() == Items.ENCHANTED_BOOK)
+				{
+					// *** copied from net.minecraft.entity.passive.EntityVillager.ListEnchantedBookForEmeralds ***
+					Enchantment enchantment = (Enchantment)Enchantment.REGISTRY.getRandomObject(random);
+					int enchLevel = MathHelper.getRandomIntegerInRange(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
+
+					sellStack.setTagCompound(Items.ENCHANTED_BOOK.getEnchantedItemStack(new EnchantmentData(enchantment, enchLevel)).getTagCompound());
+
+					int buyAmount = 2 + random.nextInt(5 + enchLevel * 10) + 3 * enchLevel;
+					if (enchantment.isTreasureEnchantment()) buyAmount *= 2;
+
+					PriceInfo buyPrice = this.buy1.getPrices().get(buyIndex1);
+					if (buyAmount < buyPrice.getFirst()) buyAmount = buyPrice.getFirst();
+					if (buyAmount > buyPrice.getSecond()) buyAmount = buyPrice.getSecond();
+
+					buyStack1.stackSize = buyAmount;
+				}
+				else
+				{
+					// *** copied from net.minecraft.entity.passive.EntityVillager.ListEnchantedItemForEmeralds ***
+					sellStack = EnchantmentHelper.addRandomEnchantment(random, sellStack, 5 + random.nextInt(15), false);
+				}
+			}
+
+			// if the nbt data specifies a random potion effect
+			if (tag != null && tag.hasKey("Potion") && tag.getString("Potion").equals("random"))
+			{
+				// remove the random potion sub compound from the nbt tag
+				tag.removeTag("Potion");
+				sellStack.setTagCompound(tag);
+
+				// apply random potion effects to the item being sold
+				sellStack = PotionUtils.addPotionToItemStack(sellStack, PotionType.REGISTRY.getRandomObject(random));
+			}
+
+			// add a recipe to the merchant recipe list
+			recipeList.add(buy2 == null ? new MerchantRecipe(buyStack1, sellStack) : new MerchantRecipe(buyStack1, buyStack2, sellStack));
+		}
+
 	}
 
 
 	/**
-	 * A villager buying trade where the player receives an emerald in exchange for multiple items
+	 * A villager buying trade where the player receives currency items (e.g. emeralds) in exchange for other items
 	 *
 	 */
-	public static class VTTEmeraldsForItems implements IVTTTradeList
+	public static class VTTVillagerBuyingTrade extends VTTVillagerTradeBase
 	{
-		private double chance = 1;
-
-		public ItemStack buy1;
-		public PriceInfo buyPrice;
-		public PriceInfo sellPrice;
-
-		public VTTEmeraldsForItems(ItemStack buy1, PriceInfo buyPrice)
+		public VTTVillagerBuyingTrade(ItemStacksAndPrices buy1, ItemStacksAndPrices buy2, ItemStacksAndPrices sell, double chance)
 		{
-			this.buy1 = buy1.copy();
-			this.buyPrice = buyPrice;
-			this.sellPrice = new PriceInfo(-1, -1);
-		}
-
-		public VTTEmeraldsForItems(ItemStack buy1, PriceInfo buyPrice, PriceInfo sellPrice)
-		{
-			this.buy1 = buy1.copy();
-			this.buyPrice = buyPrice;
-			this.sellPrice = sellPrice;
-		}
-
-		@Override
-		public void setChance(double chance){ this.chance = chance; }
-
-		@Override
-		public void modifyMerchantRecipeList(MerchantRecipeList recipeList, Random random)
-		{
-			if (chance != 1 && random.nextDouble() > chance) return;
-
-			int buyAmount = this.buyPrice.getPrice(random);
-			int sellAmount = this.sellPrice.getPrice(random);
-
-			ItemStack buy1 = this.buy1.copy(); buy1.stackSize = buyAmount;
-			ItemStack sell = new ItemStack(Items.EMERALD, Math.abs(sellAmount));
-
-			recipeList.add(new MerchantRecipe(buy1, sell));
-		}
-	}
-
-
-
-
-	/**
-	 * A villager selling trade where the player receives items from the villager in exchange for emeralds
-	 *
-	 */
-	public static class VTTItemsForEmeralds implements IVTTTradeList
-	{
-		public double chance = 1;
-
-		public PriceInfo buyPrice;
-		public ItemStack sell;
-		public PriceInfo sellPrice;
-
-
-		public VTTItemsForEmeralds(PriceInfo buyPrice, ItemStack sell, PriceInfo sellPrice)
-		{
-			this.buyPrice = buyPrice;
-			this.sell = sell.copy();
-			this.sellPrice = sellPrice;
-		}
-
-		@Override
-		public void setChance(double chance){ this.chance = chance; }
-
-		@Override
-		public void modifyMerchantRecipeList(MerchantRecipeList recipeList, Random random)
-		{
-			if (chance != 1 && random.nextDouble() > chance) return;
-
-			int buyAmount = this.buyPrice.getPrice(random);
-			int sellAmount = this.sellPrice.getPrice(random);
-
-			ItemStack buy1 = new ItemStack(Items.EMERALD, buyAmount);
-			ItemStack sell = this.sell.copy(); sell.stackSize = Math.abs(sellAmount);
-
-			NBTTagCompound tag = sell.getTagCompound();
-
-			if (tag != null && tag.hasKey("ench") && tag.getString("ench").equals("random"))
-			{
-				tag.removeTag("ench");
-				sell.setTagCompound(tag);
-
-				if (sell.getItem() == Items.ENCHANTED_BOOK)
-				{
-					Enchantment enchantment = (Enchantment)Enchantment.REGISTRY.getRandomObject(random);
-					int enchLevel = MathHelper.getRandomIntegerInRange(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
-
-					sell = Items.ENCHANTED_BOOK.getEnchantedItemStack(new EnchantmentData(enchantment, enchLevel));
-
-					int buyPrice = 2 + random.nextInt(5 + enchLevel * 10) + 3 * enchLevel;
-					if (enchantment.isTreasureEnchantment()) buyPrice *= 2;
-
-					int buyPriceMin = Math.min(this.buyPrice.getFirst(), this.buyPrice.getSecond());
-					int buyPriceMax = Math.max(this.buyPrice.getFirst(), this.buyPrice.getSecond());
-
-					if (buyPrice < buyPriceMin) buyPrice = buyPriceMin;
-					if (buyPrice > buyPriceMax) buyPrice = buyPriceMax;
-
-					buy1.stackSize = buyPrice;
-				}
-				else
-				{
-					sell = EnchantmentHelper.addRandomEnchantment(random, sell, 5 + random.nextInt(15), false);
-				}
-			}
-
-			if (tag != null && tag.hasKey("Potion") && tag.getString("Potion").equals("random"))
-			{
-				tag.removeTag("Potion");
-				sell.setTagCompound(tag);
-				sell = PotionUtils.addPotionToItemStack(sell, PotionType.REGISTRY.getRandomObject(random));
-			}
-
-			recipeList.add(new MerchantRecipe(buy1, sell));
-		}
-	}
-
-
-
-
-
-	public static class VTTRandomItemsForEmeralds implements IVTTTradeList
-	{
-		public double chance = 1;
-
-		public PriceInfo[] buyPrice;
-		public ItemStack[] sell;
-		public PriceInfo[] sellPrice;
-
-		public VTTRandomItemsForEmeralds(PriceInfo[] buyPrice, ItemStack[] sell, PriceInfo[] sellPrice)
-		{
-			this.buyPrice = buyPrice.clone();
-			this.sell = sell.clone();
-			this.sellPrice = sellPrice.clone();
-		}
-
-
-		@Override
-		public void setChance(double chance){ this.chance = chance; }
-
-		@Override
-		public void modifyMerchantRecipeList(MerchantRecipeList recipeList, Random random)
-		{
-			if (chance != 1 && random.nextDouble() > chance) return;
-
-			int min = 0;
-			int max = buyPrice.length - 1;
-			int index = random.nextInt((max - min) + 1) + min;
-
-			int buyAmount = this.buyPrice[index].getPrice(random);
-			int sellAmount = this.sellPrice[index].getPrice(random);
-
-			ItemStack buy1 = new ItemStack(Items.EMERALD, buyAmount);
-			ItemStack sell = this.sell[index].copy(); sell.stackSize = Math.abs(sellAmount);
-
-			NBTTagCompound tag = sell.getTagCompound();
-
-			if (tag != null && tag.hasKey("ench") && tag.getString("ench").equals("random"))
-			{
-				tag.removeTag("ench");
-				sell.setTagCompound(tag);
-
-				if (sell.getItem() == Items.ENCHANTED_BOOK)
-				{
-					Enchantment enchantment = (Enchantment)Enchantment.REGISTRY.getRandomObject(random);
-					int enchLevel = MathHelper.getRandomIntegerInRange(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
-
-					sell = Items.ENCHANTED_BOOK.getEnchantedItemStack(new EnchantmentData(enchantment, enchLevel));
-
-					int buyPrice = 2 + random.nextInt(5 + enchLevel * 10) + 3 * enchLevel;
-					if (enchantment.isTreasureEnchantment()) buyPrice *= 2;
-
-					int buyPriceMin = Math.min(this.buyPrice[index].getFirst(), this.buyPrice[index].getSecond());
-					int buyPriceMax = Math.max(this.buyPrice[index].getFirst(), this.buyPrice[index].getSecond());
-
-					if (buyPrice < buyPriceMin) buyPrice = buyPriceMin;
-					if (buyPrice > buyPriceMax) buyPrice = buyPriceMax;
-
-					buy1.stackSize = buyPrice;
-				}
-				else
-				{
-					sell = EnchantmentHelper.addRandomEnchantment(random, sell, 5 + random.nextInt(15), false);
-				}
-			}
-
-			if (tag != null && tag.hasKey("Potion") && tag.getString("Potion").equals("random"))
-			{
-				tag.removeTag("Potion");
-				sell.setTagCompound(tag);
-				sell = PotionUtils.addPotionToItemStack(sell, PotionType.REGISTRY.getRandomObject(random));
-			}
-
-			recipeList.add(new MerchantRecipe(buy1, sell));
+			super(buy1, buy2, sell, chance);
 		}
 	}
 
 
 	/**
-	 * A villager selling trade where the player receives items from the villager in exchange for items and emeralds
+	 * A villager selling trade where the player receives items from the villager in exchange for currency items (e.g. emeralds)
 	 *
 	 */
-	public static class VTTItemsAndEmeraldsForItems implements IVTTTradeList
+	public static class VTTVillagerSellingTrade extends VTTVillagerTradeBase
 	{
-		public double chance = 1;
-
-		public ItemStack buy1;
-		public PriceInfo buyPrice1;
-		public PriceInfo buyPrice2;
-		public ItemStack sell;
-		public PriceInfo sellPrice;
-
-
-		public VTTItemsAndEmeraldsForItems(ItemStack buy1, PriceInfo buyPrice1, ItemStack sell, PriceInfo sellPrice)
+		public VTTVillagerSellingTrade(ItemStacksAndPrices buy1, ItemStacksAndPrices buy2, ItemStacksAndPrices sell, double chance)
 		{
-			this.buy1 = buy1.copy();
-			this.buyPrice1 = buyPrice1;
-			this.buyPrice2 = new PriceInfo(1, 1);
-			this.sell = sell.copy();
-			this.sellPrice = sellPrice;
-		}
-
-		public VTTItemsAndEmeraldsForItems(ItemStack buy1, PriceInfo buyPrice1, PriceInfo buyPrice2, ItemStack sell, PriceInfo sellPrice)
-		{
-			this.buy1 = buy1.copy();
-			this.buyPrice1 = buyPrice1;
-			this.buyPrice2 = buyPrice2;
-			this.sell = sell.copy();
-			this.sellPrice = sellPrice;
-		}
-
-
-		@Override
-		public void setChance(double chance){ this.chance = chance; }
-
-		@Override
-		public void modifyMerchantRecipeList(MerchantRecipeList recipeList, Random random)
-		{
-			if (chance != 1 && random.nextDouble() > chance) return;
-
-			int buyAmount1 = this.buyPrice1.getPrice(random);
-			int buyAmount2 = this.buyPrice2.getPrice(random);
-			int sellAmount = this.sellPrice.getPrice(random);
-
-			ItemStack buy1 = this.buy1.copy(); buy1.stackSize = buyAmount1;
-			ItemStack buy2 = new ItemStack(Items.EMERALD, buyAmount2);
-			ItemStack sell = this.sell.copy(); sell.stackSize = sellAmount;
-
-			NBTTagCompound tag = sell.getTagCompound();
-
-			if (tag != null && tag.hasKey("ench") && tag.getString("ench").equals("random"))
-			{
-				tag.removeTag("ench");
-				sell.setTagCompound(tag);
-
-				if (sell.getItem() == Items.ENCHANTED_BOOK)
-				{
-					Enchantment enchantment = (Enchantment)Enchantment.REGISTRY.getRandomObject(random);
-					int enchLevel = MathHelper.getRandomIntegerInRange(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
-
-					sell = Items.ENCHANTED_BOOK.getEnchantedItemStack(new EnchantmentData(enchantment, enchLevel));
-
-					int buyPrice = 2 + random.nextInt(5 + enchLevel * 10) + 3 * enchLevel;
-					if (enchantment.isTreasureEnchantment()) buyPrice *= 2;
-
-					int buyPriceMin = Math.min(this.buyPrice2.getFirst(), this.buyPrice2.getSecond());
-					int buyPriceMax = Math.max(this.buyPrice2.getFirst(), this.buyPrice2.getSecond());
-
-					if (buyPrice < buyPriceMin) buyPrice = buyPriceMin;
-					if (buyPrice > buyPriceMax) buyPrice = buyPriceMax;
-
-					buy2.stackSize = buyPrice;
-				}
-				else
-				{
-					sell = EnchantmentHelper.addRandomEnchantment(random, sell, 5 + random.nextInt(15), false);
-				}
-			}
-
-			if (tag != null && tag.hasKey("Potion") && tag.getString("Potion").equals("random"))
-			{
-				tag.removeTag("Potion");
-				sell.setTagCompound(tag);
-				sell = PotionUtils.addPotionToItemStack(sell, PotionType.REGISTRY.getRandomObject(random));
-			}
-
-			recipeList.add(new MerchantRecipe(buy1, buy2, sell));
+			super(buy1, buy2, sell, chance);
 		}
 	}
 

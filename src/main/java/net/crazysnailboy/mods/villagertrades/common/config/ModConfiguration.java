@@ -14,6 +14,7 @@ public class ModConfiguration
 
 	public static boolean loadVillagersFromJar = true;
 	public static boolean loadTradesFromJar = true;
+	public static String[] currencyItems = new String[] { "minecraft:emerald" };
 
 
 	public static void preInit()
@@ -33,6 +34,7 @@ public class ModConfiguration
 	{
 		loadVillagersFromJar = config.getBoolean("loadVillagersFromJar", Configuration.CATEGORY_GENERAL, loadVillagersFromJar, "");
 		loadTradesFromJar = config.getBoolean("loadTradesFromJar", Configuration.CATEGORY_GENERAL, loadTradesFromJar, "");
+		currencyItems = config.getStringList("currencyItems", Configuration.CATEGORY_GENERAL, currencyItems, "");
 	}
 
 }
