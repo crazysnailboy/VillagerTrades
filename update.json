@@ -1,22 +1,25 @@
 {
 	"homepage": "https://minecraft.curseforge.com/projects/villager-trade-tables/files",
 	"promos": {
-		"1.11.2-latest": "0.5.1",
-		"1.11.2-recommended": "0.5.1",
-		"1.11-latest": "0.5.1",
-		"1.11-recommended": "0.5.1",
-		"1.10.2-latest": "0.5.1",
-		"1.10.2-recommended": "0.5.1"
+		"1.11.2-latest": "0.6",
+		"1.11.2-recommended": "0.6",
+		"1.11-latest": "0.6",
+		"1.11-recommended": "0.6",
+		"1.10.2-latest": "0.6",
+		"1.10.2-recommended": "0.6"
 	},
 	"1.11.2": {
+		"0.6": "enchanted book support, currency items, better multiple choice trades",
 		"0.5.1": "fixed a bug with json files not being copied to config folder",
 		"0.5": ""
 	},
 	"1.11": {
+		"0.6": "enchanted book support, currency items, better multiple choice trades",
 		"0.5.1": "fixed a bug with json files not being copied to config folder",
 		"0.5": ""
 	},
 	"1.10.2": {
+		"0.6": "enchanted book support, currency items, better multiple choice trades",
 		"0.5.1": "fixed a bug with json files not being copied to config folder",
 		"0.5": ""
 	}
