@@ -96,7 +96,7 @@ public class TradeLoader
 
 			// get the level this trade change applies to, and what type of change it is
 			String jsonRecipeAction = jsonRecipeObject.get("action").getAsString();
-			int jsonCareerLevel = jsonRecipeObject.get("CareerLevel").getAsInt();
+			int jsonCareerLevel = (jsonRecipeObject.has("CareerLevel") ? jsonRecipeObject.get("CareerLevel").getAsInt() : 0);
 
 			// add a new trade if we're supposed to add one
 			if (jsonRecipeAction.equals("add"))
@@ -116,6 +116,23 @@ public class TradeLoader
 				// remove the old one, and add a new one
 				removeTradeFromCareer(career, jsonCareerLevel, jsonRecipeObject);
 				addTradeToCareer(career, jsonCareerLevel, jsonRecipeObject);
+			}
+
+			// if we're supposed to clear the trades
+			else if (jsonRecipeAction.equals("clear"))
+			{
+				// if a career level was specified...
+				if (jsonCareerLevel > 0)
+				{
+					// clear the trades for that level
+					clearCareerTrades(career, jsonCareerLevel);
+				}
+				// if not...
+				else
+				{
+					// clear all the trades from the career
+					clearCareerTrades(career);
+				}
 			}
 
 		}
@@ -228,6 +245,23 @@ public class TradeLoader
 			}
 
 		}
+	}
+
+
+	private static void clearCareerTrades(VillagerCareer career)
+	{
+		List<List<ITradeList>> trades = new VTTVillagerCareer(career).getTrades();
+		for ( List<ITradeList> careerTrades : trades )
+		{
+			careerTrades.clear();
+		}
+		trades.clear();
+	}
+
+	private static void clearCareerTrades(VillagerCareer career, int careerLevel)
+	{
+		List<ITradeList> trades = new VTTVillagerCareer(career).getTrades(careerLevel);
+		trades.clear();
 	}
 
 
