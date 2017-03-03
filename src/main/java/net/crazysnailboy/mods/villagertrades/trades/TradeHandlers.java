@@ -46,6 +46,14 @@ public class TradeHandlers
 		tradeHandlers.put(ListEnchantedBookForEmeralds.class, new ListEnchantedBookForEmeraldsHandler());
 		tradeHandlers.put(ListEnchantedItemForEmeralds.class, new ListEnchantedItemForEmeraldsHandler());
 		tradeHandlers.put(ListItemForEmeralds.class, new ListItemForEmeraldsHandler());
+
+		try
+		{
+			Class TreasureMapForEmeralds$class = Class.forName("net.minecraft.entity.passive.EntityVillager$TreasureMapForEmeralds");
+			tradeHandlers.put(TreasureMapForEmeralds$class, new TreasureMapForEmeraldsHandler());
+		}
+		catch (ClassNotFoundException e){ }
+
 		// custom
 		tradeHandlers.put(VTTVillagerSellingTrade.class, new VTTVillagerSellingHandler());
 	}
@@ -128,6 +136,17 @@ public class TradeHandlers
 		{
 			ListItemForEmeralds trade = (ListItemForEmeralds)t;
 			ItemStack stack = trade.itemToBuy.copy();
+			return stack;
+		}
+	}
+
+	public static class TreasureMapForEmeraldsHandler extends VTTVillagerSellingHandler
+	{
+		@Override
+		public ItemStack getSellingStack(ITradeList t)
+		{
+//			TreasureMapForEmeralds trade = (TreasureMapForEmeralds)t;
+			ItemStack stack = new ItemStack(Items.FILLED_MAP, 1);
 			return stack;
 		}
 	}
