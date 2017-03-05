@@ -17,32 +17,40 @@ import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
+import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 public class CustomTrades
 {
 
+	public static class ExtraTradeData
+	{
+		public double chance = 1;
+		public Boolean rewardsExp;
+		public Integer maxTradeUses;
+	}
+
+
 	public static class VTTVillagerTradeBase implements EntityVillager.ITradeList
 	{
-		private double chance;
-
 		private ItemStacksAndPrices buy1;
 		private ItemStacksAndPrices buy2;
 		private ItemStacksAndPrices sell;
+		private ExtraTradeData extraTradeData;
 
 
-		public VTTVillagerTradeBase(ItemStacksAndPrices buy1, ItemStacksAndPrices buy2, ItemStacksAndPrices sell, double chance)
+		public VTTVillagerTradeBase(ItemStacksAndPrices buy1, ItemStacksAndPrices buy2, ItemStacksAndPrices sell, ExtraTradeData extraTradeData)
 		{
-			this.chance = chance;
 			this.buy1 = buy1;
 			this.buy2 = buy2;
 			this.sell = sell;
+			this.extraTradeData = extraTradeData;
 		}
 
 
 		@Override
 		public void addMerchantRecipe(IMerchant merchant, MerchantRecipeList recipeList, Random random)
 		{
-			if (chance != 1 && random.nextDouble() > chance) return;
+			if (extraTradeData.chance != 1 && random.nextDouble() > extraTradeData.chance) return;
 
 			// choose random index values to use to retrieve elements from the itemstacks and prices collections
 			int buyIndex1 = random.nextInt(buy1.getItemStacks().size());
@@ -107,8 +115,25 @@ public class CustomTrades
 				sellStack = PotionUtils.addPotionToItemStack(sellStack, PotionType.REGISTRY.getRandomObject(random));
 			}
 
-			// add a recipe to the merchant recipe list
-			recipeList.add(buy2 == null ? new MerchantRecipe(buyStack1, sellStack) : new MerchantRecipe(buyStack1, buyStack2, sellStack));
+			// create a merchant recipe to the merchant recipe list
+			MerchantRecipe recipe = buy2 == null ? new MerchantRecipe(buyStack1, sellStack) : new MerchantRecipe(buyStack1, buyStack2, sellStack);
+
+			// if the extra trade data specifies a rewardsExp value
+			if (extraTradeData.rewardsExp != null)
+			{
+				// set the private rewardsExp field on the merchant recipe
+				boolean rewardsExp = extraTradeData.rewardsExp.booleanValue();
+				ObfuscationReflectionHelper.setPrivateValue(MerchantRecipe.class, recipe, rewardsExp, "rewardsExp","field_180323_f");
+			}
+			// if the extra trade data specifes a maxTradeUses value
+			if (extraTradeData.maxTradeUses != null)
+			{
+				// set the private maxTradeUses field on the merchant recipe
+				int maxTradeUses = extraTradeData.maxTradeUses.intValue();
+				ObfuscationReflectionHelper.setPrivateValue(MerchantRecipe.class, recipe, maxTradeUses, "maxTradeUses","field_82786_e");
+			}
+
+			recipeList.add(recipe);
 		}
 
 	}
@@ -120,9 +145,9 @@ public class CustomTrades
 	 */
 	public static class VTTVillagerBuyingTrade extends VTTVillagerTradeBase
 	{
-		public VTTVillagerBuyingTrade(ItemStacksAndPrices buy1, ItemStacksAndPrices buy2, ItemStacksAndPrices sell, double chance)
+		public VTTVillagerBuyingTrade(ItemStacksAndPrices buy1, ItemStacksAndPrices buy2, ItemStacksAndPrices sell, ExtraTradeData extraTradeData)
 		{
-			super(buy1, buy2, sell, chance);
+			super(buy1, buy2, sell, extraTradeData);
 		}
 	}
 
@@ -133,9 +158,9 @@ public class CustomTrades
 	 */
 	public static class VTTVillagerSellingTrade extends VTTVillagerTradeBase
 	{
-		public VTTVillagerSellingTrade(ItemStacksAndPrices buy1, ItemStacksAndPrices buy2, ItemStacksAndPrices sell, double chance)
+		public VTTVillagerSellingTrade(ItemStacksAndPrices buy1, ItemStacksAndPrices buy2, ItemStacksAndPrices sell, ExtraTradeData extraTradeData)
 		{
-			super(buy1, buy2, sell, chance);
+			super(buy1, buy2, sell, extraTradeData);
 		}
 	}
 

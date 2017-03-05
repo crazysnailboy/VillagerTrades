@@ -20,6 +20,7 @@ import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHel
 import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper.VTTVillagerCareer;
 import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper.VTTVillagerProfession;
 import net.crazysnailboy.mods.villagertrades.nbt.JsonToNBT;
+import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.ExtraTradeData;
 import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.VTTVillagerBuyingTrade;
 import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.VTTVillagerSellingTrade;
 import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.VTTVillagerTradeBase;
@@ -138,7 +139,7 @@ public class TradeLoader
 		}
 
 		// sort them so that the buying trades appear before the selling trades for each level (like vanilla)
-		SortCareerTrades(career);
+		if (ModConfiguration.sortTrades) sortCareerTrades(career);
 	}
 
 
@@ -155,7 +156,12 @@ public class TradeLoader
 		JsonElement jsonBuyElement = jsonRecipeObject.get("buy");
 		JsonElement jsonBuyElementB = (jsonRecipeObject.has("buyB") ? jsonRecipeObject.get("buyB") : null);
 		JsonElement jsonSellElement = jsonRecipeObject.get("sell");
-		double chance = (jsonRecipeObject.has("chance") ? jsonRecipeObject.get("chance").getAsDouble() : 1);
+
+		ExtraTradeData extraTradeData = new ExtraTradeData();
+		extraTradeData.chance = (jsonRecipeObject.has("chance") ? jsonRecipeObject.get("chance").getAsDouble() : 1);
+		if (jsonRecipeObject.has("rewardExp")) extraTradeData.rewardsExp = jsonRecipeObject.get("rewardExp").getAsBoolean();
+		if (jsonRecipeObject.has("maxUses")) extraTradeData.maxTradeUses = jsonRecipeObject.get("maxUses").getAsInt();
+
 
 		ItemStacksAndPrices buy = getItemStacksAndPrices(jsonBuyElement);
 		ItemStacksAndPrices buyB = (jsonBuyElementB != null ? getItemStacksAndPrices(jsonBuyElementB) : null);
@@ -166,15 +172,15 @@ public class TradeLoader
 
 		if (isVillagerBuying)
 		{
-			career.addTrade(careerLevel, new VTTVillagerBuyingTrade(buy, buyB, sell, chance));
+			career.addTrade(careerLevel, new VTTVillagerBuyingTrade(buy, buyB, sell, extraTradeData));
 		}
 		else if (isVillagerSelling)
 		{
-			career.addTrade(careerLevel, new VTTVillagerSellingTrade(buy, buyB, sell, chance));
+			career.addTrade(careerLevel, new VTTVillagerSellingTrade(buy, buyB, sell, extraTradeData));
 		}
 		else
 		{
-			career.addTrade(careerLevel, new VTTVillagerTradeBase(buy, buyB, sell, chance));
+			career.addTrade(careerLevel, new VTTVillagerTradeBase(buy, buyB, sell, extraTradeData));
 		}
 	}
 
@@ -269,7 +275,7 @@ public class TradeLoader
 	 * Sorts the trades at each level of a career so that the buying trades appear before the selling trades
 	 * @param career The VillagerCareer instance on which to sort the trades
 	 */
-	private static void SortCareerTrades(VillagerCareer career)
+	private static void sortCareerTrades(VillagerCareer career)
 	{
 		// get the trades from the career instance in a modifiable form
 		List<List<ITradeList>> trades = new VTTVillagerCareer(career).getTrades();
