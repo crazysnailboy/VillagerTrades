@@ -2,7 +2,7 @@ package net.crazysnailboy.mods.villagertrades.loaders;
 
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -30,8 +30,7 @@ public class VillagerLoader
 	public static void loadCustomVillagerData()
 	{
 		// build the file map
-		HashMap<String, String> villagerFiles = FileUtils.createFileMap("villagers", ModConfiguration.loadVillagersFromJar);
-		sortVillagers(villagerFiles);
+		Map<String, String> villagerFiles = sortVillagers(FileUtils.createFileMap("villagers", ModConfiguration.loadVillagersFromJar));
 
 		// iterate over the filenames in the map
 		for (String fileName : villagerFiles.keySet())
@@ -50,7 +49,7 @@ public class VillagerLoader
 
 
 
-	private static void sortVillagers(HashMap<String, String> villagerFiles)
+	private static Map<String, String> sortVillagers(Map<String, String> villagerFiles)
 	{
 
 		List<Map.Entry<String, String>> list = new LinkedList<Map.Entry<String, String>>( villagerFiles.entrySet() );
@@ -69,11 +68,20 @@ public class VillagerLoader
 				int id1 = (p1.has("id") ? p1.get("id").getAsInt() : 0);
 				int id2 = (p2.has("id") ? p2.get("id").getAsInt() : 0);
 
-				return (id2 - id1);
+				String name1 = p1.get("name").getAsString();
+				String name2 = p2.get("name").getAsString();
+
+				return (id1 != id2 ? id2 - id1 : name1.compareTo(name2));
 			}
 
 		});
 
+		Map<String, String> result = new LinkedHashMap<String, String>();
+		for ( Map.Entry<String, String> entry : list )
+		{
+			result.put( entry.getKey(), entry.getValue() );
+		}
+		return result;
 	}
 
 

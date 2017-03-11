@@ -21,7 +21,7 @@ public class VillagerTradesMod
 
 	public static final String MODID = "vtt";
 	public static final String MODNAME = "Villager Trade Tables";
-	public static final String VERSION = "0.6.2";
+	public static final String VERSION = "0.6.3";
 	public static final String UPDATEJSON = "https://raw.githubusercontent.com/crazysnailboy/VillagerTrades/master/update.json";
 
 
