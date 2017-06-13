@@ -11,7 +11,6 @@ import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 
 import net.minecraft.nbt.NBTBase;
-import net.minecraft.nbt.NBTException;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagDouble;
@@ -591,4 +590,14 @@ public class JsonToNBT
 			}
 		}
 	}
+
+
+	private static class NBTException extends net.minecraft.nbt.NBTException
+	{
+		private NBTException(String message)
+		{
+			super(message, "", -1);
+		}
+	}
+
 }

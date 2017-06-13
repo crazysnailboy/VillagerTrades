@@ -40,7 +40,8 @@ public class VillagerRegistryHelper
 
 		public ResourceLocation getName()
 		{
-			return (ResourceLocation)ObfuscationReflectionHelper.getPrivateValue(professionClass, this.profession, "name");
+			return this.profession.getRegistryName();
+//			return (ResourceLocation)ObfuscationReflectionHelper.getPrivateValue(professionClass, this.profession, "name");
 		}
 
 		public List<VillagerRegistry.VillagerCareer> getCareers()

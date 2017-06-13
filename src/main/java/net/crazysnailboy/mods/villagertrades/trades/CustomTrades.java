@@ -10,6 +10,7 @@ import net.minecraft.entity.IMerchant;
 import net.minecraft.entity.passive.EntityVillager;
 import net.minecraft.entity.passive.EntityVillager.PriceInfo;
 import net.minecraft.init.Items;
+import net.minecraft.item.ItemEnchantedBook;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.potion.PotionType;
@@ -86,7 +87,7 @@ public class CustomTrades
 					Enchantment enchantment = (Enchantment)Enchantment.REGISTRY.getRandomObject(random);
 					int enchLevel = MathHelper.getInt(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
 
-					sellStack.setTagCompound(Items.ENCHANTED_BOOK.getEnchantedItemStack(new EnchantmentData(enchantment, enchLevel)).getTagCompound());
+					sellStack.setTagCompound(((ItemEnchantedBook)Items.ENCHANTED_BOOK).getEnchantedItemStack(new EnchantmentData(enchantment, enchLevel)).getTagCompound());
 
 					int buyAmount = 2 + random.nextInt(5 + enchLevel * 10) + 3 * enchLevel;
 					if (enchantment.isTreasureEnchantment()) buyAmount *= 2;
