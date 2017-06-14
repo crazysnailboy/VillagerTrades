@@ -1,10 +1,10 @@
 package net.crazysnailboy.mods.villagertrades.common.config;
 
 import java.io.File;
-
 import net.crazysnailboy.mods.villagertrades.VillagerTradesMod;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.fml.common.Loader;
+
 
 public class ModConfiguration
 {

@@ -22,9 +22,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
-
 import org.apache.commons.io.IOUtils;
-
 import net.crazysnailboy.mods.villagertrades.VillagerTradesMod;
 import net.minecraftforge.fml.common.Loader;
 
@@ -46,7 +44,7 @@ public class FileUtils
 		if (loadFilesFromJar)
 		{
 			// load the villagers from the jar's assets folder
-			for ( String fileName : getFileNamesFromModFolder("/assets/" + VillagerTradesMod.MODID + "/data/" + folderName + "/"))
+			for (String fileName : getFileNamesFromModFolder("/assets/" + VillagerTradesMod.MODID + "/data/" + folderName + "/"))
 			{
 				String fileContents = readFileContentsFromMod("assets/" + VillagerTradesMod.MODID + "/data/" + folderName + "/" + fileName);
 				fileMap.put(fileName, fileContents);
@@ -60,7 +58,7 @@ public class FileUtils
 		File villagersFolder = new File(configFolder, folderName);
 		if (villagersFolder.exists())
 		{
-			for ( String fileName : getFileNamesFromFolder(villagersFolder.toPath()) )
+			for (String fileName : getFileNamesFromFolder(villagersFolder.toPath()))
 			{
 				String fileContents = readFileContents(new File(villagersFolder, fileName));
 				fileMap.put(fileName, fileContents);
@@ -69,7 +67,7 @@ public class FileUtils
 		else
 		{
 			villagersFolder.mkdirs();
-			for ( String fileName : fileMap.keySet())
+			for (String fileName : fileMap.keySet())
 			{
 				writeFile(new File(villagersFolder, fileName), fileMap.get(fileName));
 			}
@@ -92,7 +90,10 @@ public class FileUtils
 			}
 			walk.close();
 		}
-		catch(Exception ex){ VillagerTradesMod.logger.catching(ex); }
+		catch (Exception ex)
+		{
+			VillagerTradesMod.LOGGER.catching(ex);
+		}
 		return fileNames;
 	}
 
@@ -113,7 +114,7 @@ public class FileUtils
 				}
 				catch (FileSystemAlreadyExistsException ex)
 				{
-					fileSystem = FileSystems.getFileSystem(resourceUri); 
+					fileSystem = FileSystems.getFileSystem(resourceUri);
 				}
 				resourcePath = fileSystem.getPath(resourceFolder);
 			}
@@ -130,7 +131,10 @@ public class FileUtils
 			}
 			walk.close();
 		}
-		catch(Exception ex){ VillagerTradesMod.logger.catching(ex); }
+		catch (Exception ex)
+		{
+			VillagerTradesMod.LOGGER.catching(ex);
+		}
 		return fileNames;
 	}
 
@@ -149,7 +153,10 @@ public class FileUtils
 			stream.close();
 
 		}
-		catch(Exception ex){ VillagerTradesMod.logger.catching(ex); }
+		catch (Exception ex)
+		{
+			VillagerTradesMod.LOGGER.catching(ex);
+		}
 		return fileContents;
 	}
 
@@ -167,7 +174,10 @@ public class FileUtils
 			stream.close();
 
 		}
-		catch(Exception ex){ VillagerTradesMod.logger.catching(ex); }
+		catch (Exception ex)
+		{
+			VillagerTradesMod.LOGGER.catching(ex);
+		}
 		return fileContents;
 	}
 
@@ -185,7 +195,10 @@ public class FileUtils
 			outputStream.close();
 
 		}
-		catch(Exception ex){ VillagerTradesMod.logger.catching(ex); }
+		catch (Exception ex)
+		{
+			VillagerTradesMod.LOGGER.catching(ex);
+		}
 	}
 
 
