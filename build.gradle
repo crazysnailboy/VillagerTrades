@@ -22,27 +22,23 @@ compileJava {
 minecraft {
     version = "1.10.2-12.18.3.2185"
     runDir = "run"
-    mappings = "snapshot_20161111"
+    mappings = "stable_29"
     makeObfSourceJar = false
+    
+    replace "\${version}", project.version
+    replaceIn "VillagerTradesMod.java"
 }
 
 dependencies {
 }
 
 processResources {
-    // this will ensure that this task is redone when the versions change.
     inputs.property "version", project.version
     inputs.property "mcversion", project.minecraft.version
-
-    // replace stuff in mcmod.info, nothing else
     from(sourceSets.main.resources.srcDirs) {
         include 'mcmod.info'
-                
-        // replace version and mcversion
         expand 'version':project.version, 'mcversion':project.minecraft.version
     }
-        
-    // copy everything else, thats not the mcmod.info
     from(sourceSets.main.resources.srcDirs) {
         exclude 'mcmod.info'
     }

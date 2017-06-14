@@ -6,14 +6,11 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-
 import org.apache.commons.lang3.ArrayUtils;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import net.crazysnailboy.mods.villagertrades.VillagerTradesMod;
 import net.crazysnailboy.mods.villagertrades.common.config.ModConfiguration;
 import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper;
@@ -62,14 +59,22 @@ public class TradeLoader
 				loadTradesFromFile(fileContents);
 			}
 			// write to the log if something bad happened
-			catch (UnknownProfessionException ex){ VillagerTradesMod.logger.error("Unknown profession \"" + ex.professionName + "\" in \"" + fileName + "\""); }
-			catch (UnknownCareerException ex){ VillagerTradesMod.logger.error("Unknown career \"" + ex.careerName + "\" in \"" + fileName + "\""); }
+			catch (UnknownProfessionException ex)
+			{
+				VillagerTradesMod.LOGGER.error("Unknown profession \"" + ex.professionName + "\" in \"" + fileName + "\"");
+			}
+			catch (UnknownCareerException ex)
+			{
+				VillagerTradesMod.LOGGER.error("Unknown career \"" + ex.careerName + "\" in \"" + fileName + "\"");
+			}
 			//catch (Exception ex){ VillagerTradesMod.logger.error("Error parsing \"" + fileName + "\": " + ex.getMessage()); }
 
-			catch(Exception ex){ VillagerTradesMod.logger.catching(ex); }
+			catch (Exception ex)
+			{
+				VillagerTradesMod.LOGGER.catching(ex);
+			}
 		}
 	}
-
 
 
 	/**
@@ -86,12 +91,14 @@ public class TradeLoader
 		String jsonCareer = jsonObject.get("Career").getAsString();
 
 		// get the specified career and profession from the villager registry
-		VillagerProfession profession = VillagerRegistryHelper.getProfession(jsonProfession); if (profession == null) throw new UnknownProfessionException(jsonProfession);
-		VillagerCareer career = new VTTVillagerProfession(profession).getCareer(jsonCareer); if (career == null) throw new UnknownCareerException(jsonCareer);
+		VillagerProfession profession = VillagerRegistryHelper.getProfession(jsonProfession);
+		if (profession == null) throw new UnknownProfessionException(jsonProfession);
+		VillagerCareer career = new VTTVillagerProfession(profession).getCareer(jsonCareer);
+		if (career == null) throw new UnknownCareerException(jsonCareer);
 
 		// iterate over the trade recipes included in the offers object
 		JsonArray jsonRecipes = jsonObject.get("Offers").getAsJsonObject().get("Recipes").getAsJsonArray();
-		for ( JsonElement jsonRecipe : jsonRecipes )
+		for (JsonElement jsonRecipe : jsonRecipes)
 		{
 			JsonObject jsonRecipeObject = jsonRecipe.getAsJsonObject();
 
@@ -141,8 +148,6 @@ public class TradeLoader
 		// sort them so that the buying trades appear before the selling trades for each level (like vanilla)
 		if (ModConfiguration.sortTrades) sortCareerTrades(career);
 	}
-
-
 
 
 	/**
@@ -257,7 +262,7 @@ public class TradeLoader
 	private static void clearCareerTrades(VillagerCareer career)
 	{
 		List<List<ITradeList>> trades = new VTTVillagerCareer(career).getTrades();
-		for ( List<ITradeList> careerTrades : trades )
+		for (List<ITradeList> careerTrades : trades)
 		{
 			careerTrades.clear();
 		}
@@ -281,11 +286,12 @@ public class TradeLoader
 		List<List<ITradeList>> trades = new VTTVillagerCareer(career).getTrades();
 
 		// iterate over the trades at each career level
-		for ( List<ITradeList> levelTrades : trades )
+		for (List<ITradeList> levelTrades : trades)
 		{
 			// sort the trades using a comparator
 			Collections.sort(levelTrades, new Comparator<ITradeList>()
 			{
+
 				@Override
 				public int compare(ITradeList tradeA, ITradeList tradeB)
 				{
@@ -324,7 +330,7 @@ public class TradeLoader
 		if (jsonTradeElement.isJsonArray())
 		{
 			JsonArray jsonArray = jsonTradeElement.getAsJsonArray();
-			for ( JsonElement jsonElement : jsonArray )
+			for (JsonElement jsonElement : jsonArray)
 			{
 				JsonObject jsonObject = jsonElement.getAsJsonObject();
 
@@ -344,7 +350,10 @@ public class TradeLoader
 						NBTTagCompound compound = JsonToNBT.getTagFromJson(jsonString);
 						stack.setTagCompound(compound);
 					}
-					catch (NBTException ex){ VillagerTradesMod.logger.catching(ex); }
+					catch (NBTException ex)
+					{
+						VillagerTradesMod.LOGGER.catching(ex);
+					}
 				}
 
 				PriceInfo price = null;
@@ -365,7 +374,7 @@ public class TradeLoader
 
 			int length = 1;
 
-			for ( String memberName : new String[] { "id", "Count", "Damage", "tag" })
+			for (String memberName : new String[] { "id", "Count", "Damage", "tag" })
 			{
 				if (jsonObject.has(memberName) && jsonObject.get(memberName).isJsonArray())
 				{
@@ -380,7 +389,7 @@ public class TradeLoader
 			boolean isTagArray = (jsonObject.has("tag") && jsonObject.get("tag").isJsonArray());
 
 
-			for ( int i = 0 ; i < length ; i++ )
+			for (int i = 0; i < length; i++)
 			{
 				JsonElement idElement = (isIdArray ? jsonObject.get("id").getAsJsonArray().get(i) : jsonObject.get("id"));
 				JsonElement countElement = (isCountArray ? jsonObject.get("Count").getAsJsonArray().get(i) : (jsonObject.has("Count") ? jsonObject.get("Count") : null));
@@ -403,7 +412,10 @@ public class TradeLoader
 						NBTTagCompound tag = JsonToNBT.getTagFromJson(tagElement.toString());
 						stack.setTagCompound(tag);
 					}
-					catch (NBTException ex){ VillagerTradesMod.logger.catching(ex); }
+					catch (NBTException ex)
+					{
+						VillagerTradesMod.LOGGER.catching(ex);
+					}
 				}
 
 				PriceInfo price = null;
@@ -419,13 +431,13 @@ public class TradeLoader
 			}
 		}
 
-		return new ItemStacksAndPrices(stacks,prices);
+		return new ItemStacksAndPrices(stacks, prices);
 	}
 
 
 	private static boolean containsCurrencyItems(List<ItemStack> stacks)
 	{
-		for ( ItemStack stack : stacks )
+		for (ItemStack stack : stacks)
 		{
 			String resourceName = Item.REGISTRY.getNameForObject(stack.getItem()).toString();
 			if (stack.getItemDamage() > 0) resourceName += "," + Integer.toString(stack.getItemDamage());
@@ -436,9 +448,9 @@ public class TradeLoader
 	}
 
 
-
 	public static class ItemStacksAndPrices
 	{
+
 		private List<ItemStack> stacks;
 		private List<PriceInfo> prices;
 
@@ -460,9 +472,9 @@ public class TradeLoader
 	}
 
 
-
 	public static class UnknownProfessionException extends RuntimeException
 	{
+
 		public String professionName;
 
 		public UnknownProfessionException(String professionName)
@@ -473,6 +485,7 @@ public class TradeLoader
 
 	public static class UnknownCareerException extends RuntimeException
 	{
+
 		public String careerName;
 
 		public UnknownCareerException(String careerName)

@@ -1,7 +1,6 @@
 package net.crazysnailboy.mods.villagertrades.trades;
 
 import java.util.Random;
-
 import net.crazysnailboy.mods.villagertrades.loaders.TradeLoader.ItemStacksAndPrices;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentData;
@@ -18,11 +17,13 @@ import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
+
 public class CustomTrades
 {
 
 	public static class ExtraTradeData
 	{
+
 		public double chance = 1;
 		public Boolean rewardsExp;
 		public Integer maxTradeUses;
@@ -31,6 +32,7 @@ public class CustomTrades
 
 	public static class VTTVillagerTradeBase implements EntityVillager.ITradeList
 	{
+
 		private ItemStacksAndPrices buy1;
 		private ItemStacksAndPrices buy2;
 		private ItemStacksAndPrices sell;
@@ -64,9 +66,12 @@ public class CustomTrades
 			int sellAmount = this.sell.getPrices().get(sellIndex).getPrice(random);
 
 			// copy itemstacks from the collections and apply the appropriate stack size to them
-			ItemStack buyStack1 = this.buy1.getItemStacks().get(buyIndex1).copy(); buyStack1.stackSize = buyAmount1;
-			ItemStack buyStack2 = (this.buy2 != null ? this.buy2.getItemStacks().get(buyIndex2).copy() : null); if (buyStack2 != null) buyStack2.stackSize = buyAmount2;
-			ItemStack sellStack = this.sell.getItemStacks().get(sellIndex).copy(); sellStack.stackSize = sellAmount;
+			ItemStack buyStack1 = this.buy1.getItemStacks().get(buyIndex1).copy();
+			buyStack1.stackSize = buyAmount1;
+			ItemStack buyStack2 = (this.buy2 != null ? this.buy2.getItemStacks().get(buyIndex2).copy() : null);
+			if (buyStack2 != null) buyStack2.stackSize = buyAmount2;
+			ItemStack sellStack = this.sell.getItemStacks().get(sellIndex).copy();
+			sellStack.stackSize = sellAmount;
 
 			// examine any nbt data present on the sell stack to see whether we should apply random effects
 			NBTTagCompound tag = sellStack.getTagCompound();
@@ -83,7 +88,7 @@ public class CustomTrades
 				{
 					// *** copied from net.minecraft.entity.passive.EntityVillager.ListEnchantedBookForEmeralds ***
 					Enchantment enchantment = (Enchantment)Enchantment.REGISTRY.getRandomObject(random);
-					int enchLevel = MathHelper.getRandomIntegerInRange(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
+					int enchLevel = MathHelper.getInt(random, enchantment.getMinLevel(), enchantment.getMaxLevel());
 
 					sellStack.setTagCompound(Items.ENCHANTED_BOOK.getEnchantedItemStack(new EnchantmentData(enchantment, enchLevel)).getTagCompound());
 
@@ -122,14 +127,14 @@ public class CustomTrades
 			{
 				// set the private rewardsExp field on the merchant recipe
 				boolean rewardsExp = extraTradeData.rewardsExp.booleanValue();
-				ObfuscationReflectionHelper.setPrivateValue(MerchantRecipe.class, recipe, rewardsExp, "rewardsExp","field_180323_f");
+				ObfuscationReflectionHelper.setPrivateValue(MerchantRecipe.class, recipe, rewardsExp, "rewardsExp", "field_180323_f");
 			}
 			// if the extra trade data specifes a maxTradeUses value
 			if (extraTradeData.maxTradeUses != null)
 			{
 				// set the private maxTradeUses field on the merchant recipe
 				int maxTradeUses = extraTradeData.maxTradeUses.intValue();
-				ObfuscationReflectionHelper.setPrivateValue(MerchantRecipe.class, recipe, maxTradeUses, "maxTradeUses","field_82786_e");
+				ObfuscationReflectionHelper.setPrivateValue(MerchantRecipe.class, recipe, maxTradeUses, "maxTradeUses", "field_82786_e");
 			}
 
 			recipeList.add(recipe);
@@ -144,6 +149,7 @@ public class CustomTrades
 	 */
 	public static class VTTVillagerBuyingTrade extends VTTVillagerTradeBase
 	{
+
 		public VTTVillagerBuyingTrade(ItemStacksAndPrices buy1, ItemStacksAndPrices buy2, ItemStacksAndPrices sell, ExtraTradeData extraTradeData)
 		{
 			super(buy1, buy2, sell, extraTradeData);
@@ -157,6 +163,7 @@ public class CustomTrades
 	 */
 	public static class VTTVillagerSellingTrade extends VTTVillagerTradeBase
 	{
+
 		public VTTVillagerSellingTrade(ItemStacksAndPrices buy1, ItemStacksAndPrices buy2, ItemStacksAndPrices sell, ExtraTradeData extraTradeData)
 		{
 			super(buy1, buy2, sell, extraTradeData);

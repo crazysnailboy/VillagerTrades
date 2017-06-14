@@ -1,7 +1,6 @@
 package net.crazysnailboy.mods.villagertrades.trades;
 
 import java.util.HashMap;
-
 import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.VTTVillagerBuyingTrade;
 import net.crazysnailboy.mods.villagertrades.trades.CustomTrades.VTTVillagerSellingTrade;
 import net.minecraft.entity.passive.EntityVillager.EmeraldForItems;
@@ -51,13 +50,13 @@ public class TradeHandlers
 	}
 
 
-
 	// ==================================================
 	// HANDLERS FOR VILLAGER BUYING TRADES
 	// ==================================================
 
 	public static class VTTVillagerBuyingHandler implements ITradeHandler
 	{
+
 		public ItemStack getBuyingStack(ITradeList trade)
 		{
 			return null;
@@ -66,6 +65,7 @@ public class TradeHandlers
 
 	public static class EmeraldForItemsHandler extends VTTVillagerBuyingHandler
 	{
+
 		@Override
 		public ItemStack getBuyingStack(ITradeList t)
 		{
@@ -82,6 +82,7 @@ public class TradeHandlers
 
 	public static class VTTVillagerSellingHandler implements ITradeHandler
 	{
+
 		public ItemStack getSellingStack(ITradeList trade)
 		{
 			return null;
@@ -90,6 +91,7 @@ public class TradeHandlers
 
 	public static class ItemAndEmeraldToItemHandler extends VTTVillagerSellingHandler
 	{
+
 		@Override
 		public ItemStack getSellingStack(ITradeList t)
 		{
@@ -101,6 +103,7 @@ public class TradeHandlers
 
 	public static class ListEnchantedBookForEmeraldsHandler extends VTTVillagerSellingHandler
 	{
+
 		@Override
 		public ItemStack getSellingStack(ITradeList t)
 		{
@@ -112,6 +115,7 @@ public class TradeHandlers
 
 	public static class ListEnchantedItemForEmeraldsHandler extends VTTVillagerSellingHandler
 	{
+
 		@Override
 		public ItemStack getSellingStack(ITradeList t)
 		{
@@ -123,6 +127,7 @@ public class TradeHandlers
 
 	public static class ListItemForEmeraldsHandler extends VTTVillagerSellingHandler
 	{
+
 		@Override
 		public ItemStack getSellingStack(ITradeList t)
 		{

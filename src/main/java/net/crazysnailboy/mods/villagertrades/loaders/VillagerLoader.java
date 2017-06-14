@@ -6,12 +6,10 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import net.crazysnailboy.mods.villagertrades.VillagerTradesMod;
 import net.crazysnailboy.mods.villagertrades.common.config.ModConfiguration;
 import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper.VTTVillagerProfession;
@@ -20,6 +18,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.VillagerRegistry;
 import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerCareer;
 import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerProfession;
+
 
 public class VillagerLoader
 {
@@ -43,18 +42,21 @@ public class VillagerLoader
 				loadVillagerFromFile(fileContents);
 			}
 			// write to the log if something bad happened
-			catch (Exception ex){ VillagerTradesMod.logger.error("Error parsing \"" + fileName + "\": " + ex.getMessage()); }
+			catch (Exception ex)
+			{
+				VillagerTradesMod.LOGGER.error("Error parsing \"" + fileName + "\": " + ex.getMessage());
+			}
 		}
 	}
-
 
 
 	private static Map<String, String> sortVillagers(Map<String, String> villagerFiles)
 	{
 
-		List<Map.Entry<String, String>> list = new LinkedList<Map.Entry<String, String>>( villagerFiles.entrySet() );
+		List<Map.Entry<String, String>> list = new LinkedList<Map.Entry<String, String>>(villagerFiles.entrySet());
 
-		Collections.sort(list, new Comparator<Map.Entry<String, String>>() {
+		Collections.sort(list, new Comparator<Map.Entry<String, String>>()
+		{
 
 			@Override
 			public int compare(Map.Entry<String, String> o1, Map.Entry<String, String> o2)
@@ -77,13 +79,12 @@ public class VillagerLoader
 		});
 
 		Map<String, String> result = new LinkedHashMap<String, String>();
-		for ( Map.Entry<String, String> entry : list )
+		for (Map.Entry<String, String> entry : list)
 		{
-			result.put( entry.getKey(), entry.getValue() );
+			result.put(entry.getKey(), entry.getValue());
 		}
 		return result;
 	}
-
 
 
 	private static void loadVillagerFromFile(String fileContents)
@@ -116,7 +117,7 @@ public class VillagerLoader
 		}
 
 		// iterate over the provided careers
-		for ( JsonElement jsonCareer : jsonCareers )
+		for (JsonElement jsonCareer : jsonCareers)
 		{
 			String careerName = jsonCareer.getAsString();
 
