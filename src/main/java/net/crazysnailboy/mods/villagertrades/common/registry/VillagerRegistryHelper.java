@@ -6,14 +6,13 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-
 import org.apache.commons.lang3.StringUtils;
-
 import net.minecraft.entity.passive.EntityVillager.ITradeList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.common.registry.VillagerRegistry;
+
 
 /**
  * A collection of helper methods and classes for accessing private or otherwise difficult to get to members of the VillagerRegistry
@@ -28,6 +27,7 @@ public class VillagerRegistryHelper
 	 */
 	public static class VTTVillagerProfession
 	{
+
 		private static final Class professionClass = VillagerRegistry.VillagerProfession.class;
 
 		public VillagerRegistry.VillagerProfession profession;
@@ -35,13 +35,12 @@ public class VillagerRegistryHelper
 
 		public int getId()
 		{
-			return ((FMLControlledNamespacedRegistry<VillagerRegistry.VillagerProfession>)VillagerRegistry.instance().getRegistry()).getIDForObject(this.profession);
+			return VillagerRegistry.getId(this.profession);
 		}
 
 		public ResourceLocation getName()
 		{
 			return this.profession.getRegistryName();
-//			return (ResourceLocation)ObfuscationReflectionHelper.getPrivateValue(professionClass, this.profession, "name");
 		}
 
 		public List<VillagerRegistry.VillagerCareer> getCareers()
@@ -52,7 +51,7 @@ public class VillagerRegistryHelper
 		public VillagerRegistry.VillagerCareer getCareer(String name)
 		{
 			List<VillagerRegistry.VillagerCareer> careers = (List<VillagerRegistry.VillagerCareer>)ObfuscationReflectionHelper.getPrivateValue(professionClass, this.profession, "careers");
-			for ( VillagerRegistry.VillagerCareer career : careers )
+			for (VillagerRegistry.VillagerCareer career : careers)
 			{
 				if (career.getName().equals(name)) return career;
 			}
@@ -65,13 +64,11 @@ public class VillagerRegistryHelper
 		}
 
 
-
 		public VTTVillagerProfession(VillagerRegistry.VillagerProfession profession)
 		{
 			this.profession = profession;
 		}
 	}
-
 
 
 	/**
@@ -80,6 +77,7 @@ public class VillagerRegistryHelper
 	 */
 	public static class VTTVillagerCareer
 	{
+
 		private static final Class careerClass = VillagerRegistry.VillagerCareer.class;
 
 		public VillagerRegistry.VillagerCareer career;
@@ -124,15 +122,6 @@ public class VillagerRegistryHelper
 	}
 
 
-
-
-
-
-
-
-
-
-
 	public static VillagerRegistry.VillagerProfession getProfession(String value)
 	{
 		return (StringUtils.isNumeric(value) ? getProfessionById(Integer.parseInt(value)) : getProfessionByName(new ResourceLocation(value)));
@@ -147,29 +136,30 @@ public class VillagerRegistryHelper
 
 	private static VillagerRegistry.VillagerProfession getProfessionByName(ResourceLocation value)
 	{
-		return VillagerRegistry.instance().getRegistry().getValue(value);
+		return ForgeRegistries.VILLAGER_PROFESSIONS.getValue(value);
 	}
 
 
-	public static List<Map.Entry<Integer,String>> getProfessionIdsAndNamesSortedById()
+	public static List<Map.Entry<Integer, String>> getProfessionIdsAndNamesSortedById()
 	{
-		List<Map.Entry<Integer,String>> professions = new ArrayList<Map.Entry<Integer,String>>();
+		List<Map.Entry<Integer, String>> professions = new ArrayList<Map.Entry<Integer, String>>();
 
-		for (VillagerRegistry.VillagerProfession profession : VillagerRegistry.instance().getRegistry().getValues())
+		for (VillagerRegistry.VillagerProfession profession : ForgeRegistries.VILLAGER_PROFESSIONS.getValues())
 		{
 			VTTVillagerProfession wrapper = new VTTVillagerProfession(profession);
 
 			int id = wrapper.getId();
 			String name = wrapper.getName().toString();
 
-			professions.add(new AbstractMap.SimpleEntry<Integer,String>(id, name));
+			professions.add(new AbstractMap.SimpleEntry<Integer, String>(id, name));
 
 		}
 
-		Collections.sort( professions, new Comparator<Map.Entry<Integer,String>>()
+		Collections.sort(professions, new Comparator<Map.Entry<Integer, String>>()
 		{
+
 			@Override
-			public int compare(Map.Entry<Integer,String> o1, Map.Entry<Integer,String> o2)
+			public int compare(Map.Entry<Integer, String> o1, Map.Entry<Integer, String> o2)
 			{
 				return o1.getKey() - o2.getKey();
 			}
@@ -178,7 +168,6 @@ public class VillagerRegistryHelper
 		return professions;
 
 	}
-
 
 
 }

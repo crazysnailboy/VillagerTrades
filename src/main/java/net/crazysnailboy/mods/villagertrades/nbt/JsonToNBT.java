@@ -2,14 +2,11 @@ package net.crazysnailboy.mods.villagertrades.nbt;
 
 import java.util.Stack;
 import java.util.regex.Pattern;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
 import com.google.common.base.Splitter;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-
 import net.minecraft.nbt.NBTBase;
 import net.minecraft.nbt.NBTTagByte;
 import net.minecraft.nbt.NBTTagCompound;
@@ -29,6 +26,7 @@ import net.minecraft.nbt.NBTTagString;
  */
 public class JsonToNBT
 {
+
 	private static final Logger LOGGER = LogManager.getLogger();
 	private static final Pattern INT_ARRAY_MATCHER = Pattern.compile("\\[[-+\\d|,\\s]+\\]");
 
@@ -201,7 +199,7 @@ public class JsonToNBT
 	{
 		String s = locateName(str, isArray);
 		String s1 = locateValue(str, isArray);
-		return joinStrToNBT(new String[] {s, s1});
+		return joinStrToNBT(new String[] { s, s1 });
 	}
 
 	private static String nextNameValuePair(String str, boolean isCompound) throws NBTException
@@ -405,6 +403,7 @@ public class JsonToNBT
 
 	abstract static class Any
 	{
+
 		protected String json;
 
 		/**
@@ -416,6 +415,7 @@ public class JsonToNBT
 
 	static class Compound extends JsonToNBT.Any
 	{
+
 		protected java.util.List<JsonToNBT.Any> tagList = Lists.<JsonToNBT.Any>newArrayList();
 
 		public Compound(String jsonIn)
@@ -443,6 +443,7 @@ public class JsonToNBT
 
 	static class List extends JsonToNBT.Any
 	{
+
 		protected java.util.List<JsonToNBT.Any> tagList = Lists.<JsonToNBT.Any>newArrayList();
 
 		public List(String json)
@@ -470,6 +471,7 @@ public class JsonToNBT
 
 	static class Primitive extends JsonToNBT.Any
 	{
+
 		private static final Pattern DOUBLE = Pattern.compile("[-+]?[0-9]*\\.?[0-9]+[d|D]");
 		private static final Pattern FLOAT = Pattern.compile("[-+]?[0-9]*\\.?[0-9]+[f|F]");
 		private static final Pattern BYTE = Pattern.compile("[-+]?[0-9]+[b|B]");
@@ -594,6 +596,7 @@ public class JsonToNBT
 
 	private static class NBTException extends net.minecraft.nbt.NBTException
 	{
+
 		private NBTException(String message)
 		{
 			super(message, "", -1);
