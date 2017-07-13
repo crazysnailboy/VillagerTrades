@@ -119,8 +119,38 @@ public class CustomTrades
 				sellStack = PotionUtils.addPotionToItemStack(sellStack, PotionType.REGISTRY.getRandomObject(random));
 			}
 
+
+			MerchantRecipe recipe;
+
+			boolean isOre = (buy1.isOre(buyIndex1) || (buy2 == null ? false : buy2.isOre(buyIndex2)) || sell.isOre(sellIndex));
+
 			// create a merchant recipe to the merchant recipe list
-			MerchantRecipe recipe = buy2 == null ? new MerchantRecipe(buyStack1, sellStack) : new MerchantRecipe(buyStack1, buyStack2, sellStack);
+			if (isOre)
+			{
+				NBTTagCompound compound = new NBTTagCompound();
+
+				NBTTagCompound buyTagStack1 = buyStack1.writeToNBT(new NBTTagCompound());
+				if (buy1.isOre(buyIndex1)) buyTagStack1.setString("id", buy1.getOreIds().get(buyIndex1));
+				compound.setTag("buy", buyTagStack1);
+
+				if (buy2 != null)
+				{
+					NBTTagCompound buyTagStack2 = buyStack2.writeToNBT(new NBTTagCompound());
+					if (buy2.isOre(buyIndex2)) buyTagStack2.setString("id", buy2.getOreIds().get(buyIndex2));
+					compound.setTag("buyB", buyTagStack2);
+				}
+
+				NBTTagCompound sellTagStack = sellStack.writeToNBT(new NBTTagCompound());
+				if (sell.isOre(sellIndex)) sellTagStack.setString("id", sell.getOreIds().get(sellIndex));
+				compound.setTag("sell", sellTagStack);
+
+				recipe = new MerchantOreRecipe(compound);
+			}
+			else
+			{
+				recipe = (buy2 == null ? new MerchantRecipe(buyStack1, sellStack) : new MerchantRecipe(buyStack1, buyStack2, sellStack));
+			}
+
 
 			// if the extra trade data specifies a rewardsExp value
 			if (extraTradeData.rewardsExp != null)

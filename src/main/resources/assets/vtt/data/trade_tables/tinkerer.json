@@ -1,0 +1,17 @@
+{ 
+	Profession: "vtt:tinkerer", 
+	Career:"tinkerer",
+
+	Offers:{
+		Recipes:[
+			{action:"add", buy:{id:"minecraft:emerald", Count:{min:2,max:3}},sell:{id:"ore:plankWood",Count:1},CareerLevel:1},
+			{action:"add", buy:{id:"minecraft:emerald", Count:{min:2,max:3}},sell:{id:"ore:stairWood",Count:1},CareerLevel:1},
+			
+			
+			{action:"add", buy:{id:"ore:plankWood", Count:1},sell:{id:"minecraft:emerald",Count:{min:2,max:3}},CareerLevel:1},
+			{action:"add", buy:{id:"ore:stairWood", Count:1},sell:{id:"minecraft:emerald",Count:{min:2,max:3}},CareerLevel:1}
+			
+		]
+	}
+
+}

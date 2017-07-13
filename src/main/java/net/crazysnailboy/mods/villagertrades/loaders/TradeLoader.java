@@ -11,6 +11,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import net.crazysnailboy.mods.villagertrades.VillagerTradesMod;
 import net.crazysnailboy.mods.villagertrades.common.config.ModConfiguration;
 import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper;
@@ -35,6 +36,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerCareer;
 import net.minecraftforge.fml.common.registry.VillagerRegistry.VillagerProfession;
+import net.minecraftforge.oredict.OreDictionary;
 
 
 public class TradeLoader
@@ -59,6 +61,11 @@ public class TradeLoader
 				loadTradesFromFile(fileContents);
 			}
 			// write to the log if something bad happened
+			catch (JsonSyntaxException ex)
+			{
+				VillagerTradesMod.LOGGER.error("Error parsing JSON file \"" + fileName + "\"");
+				VillagerTradesMod.LOGGER.error(ex.getMessage());
+			}
 			catch (UnknownProfessionException ex)
 			{
 				VillagerTradesMod.LOGGER.error("Unknown profession \"" + ex.professionName + "\" in \"" + fileName + "\"");
@@ -67,8 +74,6 @@ public class TradeLoader
 			{
 				VillagerTradesMod.LOGGER.error("Unknown career \"" + ex.careerName + "\" in \"" + fileName + "\"");
 			}
-			//catch (Exception ex){ VillagerTradesMod.logger.error("Error parsing \"" + fileName + "\": " + ex.getMessage()); }
-
 			catch (Exception ex)
 			{
 				VillagerTradesMod.LOGGER.catching(ex);
@@ -183,7 +188,7 @@ public class TradeLoader
 		{
 			career.addTrade(careerLevel, new VTTVillagerSellingTrade(buy, buyB, sell, extraTradeData));
 		}
-		else
+		else // if we don't know whether it's a buying or selling trade (because it contains no known currency items)
 		{
 			career.addTrade(careerLevel, new VTTVillagerTradeBase(buy, buyB, sell, extraTradeData));
 		}
@@ -324,6 +329,7 @@ public class TradeLoader
 
 	private static ItemStacksAndPrices getItemStacksAndPrices(JsonElement jsonTradeElement)
 	{
+		List<String> oreIds = new ArrayList<String>();
 		List<ItemStack> stacks = new ArrayList<ItemStack>();
 		List<PriceInfo> prices = new ArrayList<PriceInfo>();
 
@@ -335,7 +341,11 @@ public class TradeLoader
 				JsonObject jsonObject = jsonElement.getAsJsonObject();
 
 				String id = jsonObject.get("id").getAsString();
-				ItemStack stack = new ItemStack(Item.REGISTRY.getObject(new ResourceLocation(id)));
+
+				ResourceLocation resourceLocation = new ResourceLocation(id);
+				boolean isOreDict = (resourceLocation.getResourceDomain().equals("ore") && OreDictionary.doesOreNameExist(resourceLocation.getResourcePath()));
+
+				ItemStack stack = (isOreDict ? new ItemStack((Item)null) : new ItemStack(Item.REGISTRY.getObject(resourceLocation)));
 
 				if (jsonObject.has("Damage"))
 				{
@@ -364,6 +374,7 @@ public class TradeLoader
 					price = new PriceInfo(minPrice, maxPrice);
 				}
 
+				oreIds.add(isOreDict ? resourceLocation.getResourcePath() : null);
 				stacks.add(stack);
 				prices.add(price);
 			}
@@ -398,7 +409,11 @@ public class TradeLoader
 
 
 				String id = idElement.getAsString();
-				ItemStack stack = new ItemStack(Item.REGISTRY.getObject(new ResourceLocation(id)));
+
+				ResourceLocation resourceLocation = new ResourceLocation(id);
+				boolean isOreDict = (resourceLocation.getResourceDomain().equals("ore") && OreDictionary.doesOreNameExist(resourceLocation.getResourcePath()));
+
+				ItemStack stack = (isOreDict ? new ItemStack((Item)null) : new ItemStack(Item.REGISTRY.getObject(resourceLocation)));
 
 				if (damageElement != null)
 				{
@@ -426,23 +441,27 @@ public class TradeLoader
 					price = new PriceInfo(minPrice, maxPrice);
 				}
 
+				oreIds.add(isOreDict ? resourceLocation.getResourcePath() : null);
 				stacks.add(stack);
 				prices.add(price);
 			}
 		}
 
-		return new ItemStacksAndPrices(stacks, prices);
+		return new ItemStacksAndPrices(oreIds, stacks, prices);
 	}
 
 
 	private static boolean containsCurrencyItems(List<ItemStack> stacks)
 	{
+		// TODO - make compatible with ore dictionary entries
 		for (ItemStack stack : stacks)
 		{
-			String resourceName = Item.REGISTRY.getNameForObject(stack.getItem()).toString();
-			if (stack.getItemDamage() > 0) resourceName += "," + Integer.toString(stack.getItemDamage());
-
-			if (ArrayUtils.contains(ModConfiguration.currencyItems, resourceName)) return true;
+			if (stack.getItem() != null)
+			{
+				String resourceName = Item.REGISTRY.getNameForObject(stack.getItem()).toString();
+				if (stack.getItemDamage() > 0) resourceName += "," + Integer.toString(stack.getItemDamage());
+				if (ArrayUtils.contains(ModConfiguration.currencyItems, resourceName)) return true;
+			}
 		}
 		return false;
 	}
@@ -450,14 +469,20 @@ public class TradeLoader
 
 	public static class ItemStacksAndPrices
 	{
-
+		private List<String> oreIds;
 		private List<ItemStack> stacks;
 		private List<PriceInfo> prices;
 
-		public ItemStacksAndPrices(List<ItemStack> stacks, List<PriceInfo> prices)
+		public ItemStacksAndPrices(List<String> oreIds, List<ItemStack> stacks, List<PriceInfo> prices)
 		{
+			this.oreIds = oreIds;
 			this.stacks = stacks;
 			this.prices = prices;
+		}
+
+		public List<String> getOreIds()
+		{
+			return this.oreIds;
 		}
 
 		public List<ItemStack> getItemStacks()
@@ -468,6 +493,11 @@ public class TradeLoader
 		public List<PriceInfo> getPrices()
 		{
 			return this.prices;
+		}
+
+		public boolean isOre(int index)
+		{
+			return (this.oreIds.get(0) != null && this.stacks.get(0).getItem() == null);
 		}
 	}
 
