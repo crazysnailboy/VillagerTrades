@@ -69,7 +69,7 @@ public class ModCommand implements ICommand
 					{
 						VTTVillagerCareer vttCareer = new VTTVillagerCareer(career);
 						sender.sendMessage(new TextComponentString(vttCareer.getId() + ": " + vttCareer.getName()));
-						sender.sendMessage(new TextComponentString("\t" + vttCareer.getCareerLevels() + " levels"));
+						sender.sendMessage(new TextComponentString("   " + vttCareer.getCareerLevels() + " levels"));
 					}
 				}
 			}

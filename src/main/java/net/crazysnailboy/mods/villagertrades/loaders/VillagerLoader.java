@@ -10,6 +10,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import net.crazysnailboy.mods.villagertrades.VillagerTradesMod;
 import net.crazysnailboy.mods.villagertrades.common.config.ModConfiguration;
 import net.crazysnailboy.mods.villagertrades.common.registry.VillagerRegistryHelper.VTTVillagerProfession;
@@ -42,9 +43,15 @@ public class VillagerLoader
 				loadVillagerFromFile(fileContents);
 			}
 			// write to the log if something bad happened
+			catch (JsonSyntaxException ex)
+			{
+				VillagerTradesMod.LOGGER.error("Error parsing JSON file \"" + fileName + "\"");
+				VillagerTradesMod.LOGGER.error(ex.getMessage());
+			}
 			catch (Exception ex)
 			{
-				VillagerTradesMod.LOGGER.error("Error parsing \"" + fileName + "\": " + ex.getMessage());
+				VillagerTradesMod.LOGGER.error("Error loading villager from file \"" + fileName + "\"");
+				VillagerTradesMod.LOGGER.catching(ex);
 			}
 		}
 	}
