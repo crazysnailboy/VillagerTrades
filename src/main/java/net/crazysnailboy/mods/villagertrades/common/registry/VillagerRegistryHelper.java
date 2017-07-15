@@ -6,11 +6,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import org.apache.commons.lang3.StringUtils;
 import net.minecraft.entity.passive.EntityVillager.ITradeList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
-import net.minecraftforge.fml.common.registry.FMLControlledNamespacedRegistry;
 import net.minecraftforge.fml.common.registry.VillagerRegistry;
 
 
@@ -33,17 +31,6 @@ public class VillagerRegistryHelper
 		public VillagerRegistry.VillagerProfession profession;
 
 
-		public int getId()
-		{
-			return ((FMLControlledNamespacedRegistry<VillagerRegistry.VillagerProfession>)VillagerRegistry.instance().getRegistry()).getIDForObject(this.profession);
-		}
-
-		public ResourceLocation getName()
-		{
-			return this.profession.getRegistryName();
-//			return (ResourceLocation)ObfuscationReflectionHelper.getPrivateValue(professionClass, this.profession, "name");
-		}
-
 		public List<VillagerRegistry.VillagerCareer> getCareers()
 		{
 			return (List<VillagerRegistry.VillagerCareer>)ObfuscationReflectionHelper.getPrivateValue(professionClass, this.profession, "careers");
@@ -58,12 +45,6 @@ public class VillagerRegistryHelper
 			}
 			return null;
 		}
-
-		public VillagerRegistry.VillagerCareer getCareer(int id)
-		{
-			return this.profession.getCareer(id - 1);
-		}
-
 
 		public VTTVillagerProfession(VillagerRegistry.VillagerProfession profession)
 		{
@@ -125,19 +106,7 @@ public class VillagerRegistryHelper
 
 	public static VillagerRegistry.VillagerProfession getProfession(String value)
 	{
-		return (StringUtils.isNumeric(value) ? getProfessionById(Integer.parseInt(value)) : getProfessionByName(new ResourceLocation(value)));
-	}
-
-
-	@SuppressWarnings("deprecation")
-	private static VillagerRegistry.VillagerProfession getProfessionById(int value)
-	{
-		return VillagerRegistry.getById(value);
-	}
-
-	private static VillagerRegistry.VillagerProfession getProfessionByName(ResourceLocation value)
-	{
-		return VillagerRegistry.instance().getRegistry().getValue(value);
+		return VillagerRegistry.instance().getRegistry().getValue(new ResourceLocation(value));
 	}
 
 
@@ -147,18 +116,14 @@ public class VillagerRegistryHelper
 
 		for (VillagerRegistry.VillagerProfession profession : VillagerRegistry.instance().getRegistry().getValues())
 		{
-			VTTVillagerProfession wrapper = new VTTVillagerProfession(profession);
-
-			int id = wrapper.getId();
-			String name = wrapper.getName().toString();
-
+			@SuppressWarnings("deprecation")
+			int id = VillagerRegistry.getId(profession);
+			String name = profession.getRegistryName().toString();
 			professions.add(new AbstractMap.SimpleEntry<Integer, String>(id, name));
-
 		}
 
 		Collections.sort(professions, new Comparator<Map.Entry<Integer, String>>()
 		{
-
 			@Override
 			public int compare(Map.Entry<Integer, String> o1, Map.Entry<Integer, String> o2)
 			{
