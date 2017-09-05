@@ -1,14 +1,16 @@
 package net.crazysnailboy.mods.villagertrades.common.registry;
 
+import java.lang.reflect.Field;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import net.crazysnailboy.mods.villagertrades.util.ReflectionHelper;
 import net.minecraft.entity.passive.EntityVillager.ITradeList;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
+import net.minecraftforge.fml.common.registry.ForgeRegistries;
 import net.minecraftforge.fml.common.registry.VillagerRegistry;
 
 
@@ -27,19 +29,19 @@ public class VillagerRegistryHelper
 	{
 
 		private static final Class professionClass = VillagerRegistry.VillagerProfession.class;
+		private static final Field professionCareersField = ReflectionHelper.getField(professionClass, "careers");
 
 		public VillagerRegistry.VillagerProfession profession;
 
 
 		public List<VillagerRegistry.VillagerCareer> getCareers()
 		{
-			return (List<VillagerRegistry.VillagerCareer>)ObfuscationReflectionHelper.getPrivateValue(professionClass, this.profession, "careers");
+			return ReflectionHelper.getFieldValue(professionCareersField, this.profession);
 		}
 
 		public VillagerRegistry.VillagerCareer getCareer(String name)
 		{
-			List<VillagerRegistry.VillagerCareer> careers = (List<VillagerRegistry.VillagerCareer>)ObfuscationReflectionHelper.getPrivateValue(professionClass, this.profession, "careers");
-			for (VillagerRegistry.VillagerCareer career : careers)
+			for (VillagerRegistry.VillagerCareer career : this.getCareers())
 			{
 				if (career.getName().equals(name)) return career;
 			}
@@ -61,13 +63,15 @@ public class VillagerRegistryHelper
 	{
 
 		private static final Class careerClass = VillagerRegistry.VillagerCareer.class;
+		private static final Field careerIdField = ReflectionHelper.getField(careerClass, "id");
+		private static final Field careerTradesField = ReflectionHelper.getField(careerClass, "trades");
 
 		public VillagerRegistry.VillagerCareer career;
 
 
 		public int getId()
 		{
-			int id = (Integer)ObfuscationReflectionHelper.getPrivateValue(careerClass, this.career, "id");
+			int id = ReflectionHelper.getFieldValue(careerIdField, this.career);
 			return id + 1;
 		}
 
@@ -78,19 +82,17 @@ public class VillagerRegistryHelper
 
 		public int getCareerLevels()
 		{
-			List<List<ITradeList>> trades = (List<List<ITradeList>>)ObfuscationReflectionHelper.getPrivateValue(careerClass, this.career, "trades");
-			return trades.size();
+			return this.getTrades().size();
 		}
 
 		public List<List<ITradeList>> getTrades()
 		{
-			List<List<ITradeList>> trades = (List<List<ITradeList>>)ObfuscationReflectionHelper.getPrivateValue(careerClass, this.career, "trades");
-			return trades;
+			return ReflectionHelper.getFieldValue(careerTradesField, this.career);
 		}
 
 		public List<ITradeList> getTrades(int level)
 		{
-			List<List<ITradeList>> trades = (List<List<ITradeList>>)ObfuscationReflectionHelper.getPrivateValue(careerClass, this.career, "trades");
+			List<List<ITradeList>> trades = this.getTrades();
 			int index = level - 1;
 			return index >= 0 && index < trades.size() ? trades.get(index) : null;
 		}
@@ -106,7 +108,7 @@ public class VillagerRegistryHelper
 
 	public static VillagerRegistry.VillagerProfession getProfession(String value)
 	{
-		return VillagerRegistry.instance().getRegistry().getValue(new ResourceLocation(value));
+		return ForgeRegistries.VILLAGER_PROFESSIONS.getValue(new ResourceLocation(value));
 	}
 
 
@@ -115,7 +117,7 @@ public class VillagerRegistryHelper
 	{
 		List<Map.Entry<Integer, String>> professions = new ArrayList<Map.Entry<Integer, String>>();
 
-		for (VillagerRegistry.VillagerProfession profession : VillagerRegistry.instance().getRegistry().getValues())
+		for (VillagerRegistry.VillagerProfession profession : ForgeRegistries.VILLAGER_PROFESSIONS.getValues())
 		{
 			@SuppressWarnings("deprecation")
 			int id = VillagerRegistry.getId(profession);
