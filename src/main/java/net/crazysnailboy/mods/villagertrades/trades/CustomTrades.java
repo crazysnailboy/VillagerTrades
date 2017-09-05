@@ -1,7 +1,9 @@
 package net.crazysnailboy.mods.villagertrades.trades;
 
+import java.lang.reflect.Field;
 import java.util.Random;
 import net.crazysnailboy.mods.villagertrades.loaders.TradeLoader.ItemStacksAndPrices;
+import net.crazysnailboy.mods.villagertrades.util.ReflectionHelper;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.enchantment.EnchantmentData;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -16,11 +18,14 @@ import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.village.MerchantRecipe;
 import net.minecraft.village.MerchantRecipeList;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 
 public class CustomTrades
 {
+
+	private static final Field rewardsExpField = ReflectionHelper.getField(MerchantRecipe.class, "rewardsExp", "field_180323_f");
+	private static final Field maxTradeUsesField = ReflectionHelper.getField(MerchantRecipe.class, "maxTradeUses", "field_82786_e");
+
 
 	public static class ExtraTradeData
 	{
@@ -127,15 +132,13 @@ public class CustomTrades
 			if (extraTradeData.rewardsExp != null)
 			{
 				// set the private rewardsExp field on the merchant recipe
-				boolean rewardsExp = extraTradeData.rewardsExp.booleanValue();
-				ObfuscationReflectionHelper.setPrivateValue(MerchantRecipe.class, recipe, rewardsExp, "rewardsExp", "field_180323_f");
+				ReflectionHelper.setFieldValue(rewardsExpField, recipe, extraTradeData.rewardsExp.booleanValue());
 			}
 			// if the extra trade data specifes a maxTradeUses value
 			if (extraTradeData.maxTradeUses != null)
 			{
 				// set the private maxTradeUses field on the merchant recipe
-				int maxTradeUses = extraTradeData.maxTradeUses.intValue();
-				ObfuscationReflectionHelper.setPrivateValue(MerchantRecipe.class, recipe, maxTradeUses, "maxTradeUses", "field_82786_e");
+				ReflectionHelper.setFieldValue(maxTradeUsesField, recipe, extraTradeData.maxTradeUses.intValue());
 			}
 
 			recipeList.add(recipe);
