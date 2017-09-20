@@ -1,6 +1,10 @@
 {
 	"homepage": "https://minecraft.curseforge.com/projects/villager-trade-tables/files",
 	"promos": {
+		"1.12.2-latest": "0.6.4",
+		"1.12.2-recommended": "0.6.4",
+		"1.12.1-latest": "0.6.4",
+		"1.12.1-recommended": "0.6.4",
 		"1.12-latest": "0.6.4",
 		"1.12-recommended": "0.6.4",
 		"1.11.2-latest": "0.6.3",
@@ -10,9 +14,15 @@
 		"1.10.2-latest": "0.6.3",
 		"1.10.2-recommended": "0.6.3"
 	},
+	"1.12.2": {
+		"0.6.4": "Initial 1.12.2 release"
+	},
+	"1.12.1": {
+		"0.6.4": "Initial 1.12.1 release"
+	},
 	"1.12": {
 		"0.6.4": "Changed registrations to work with Forge 2363 and later",
-		"0.6.3": "Initial 1.12 release",
+		"0.6.3": "Initial 1.12 release"
 	},
 	"1.11.2": {
 		"0.6.3": "fixed sorting bug when loading villager professions",
