@@ -1,0 +1,21 @@
+{ 
+	Profession:"vtt:baker",
+	Career:"baker",
+
+	Offers:{
+		Recipes:[
+		
+			{action:"add", buy:{id:"minecraft:wheat",Count:{min:18,max:22}},sell:{id:"minecraft:emerald",Count:1}, CareerLevel:1},
+			{action:"add", buy:{id:"minecraft:sugar",Count:{min:18,max:22}},sell:{id:"minecraft:emerald",Count:1}, CareerLevel:1},
+			{action:"add", buy:{id:"minecraft:egg",Count:{min:14,max:16}},sell:{id:"minecraft:emerald",Count:1}, CareerLevel:1},
+			
+			{action:"add", buy:{id:"minecraft:pumpkin",Count:{min:8,max:13}},sell:{id:"minecraft:emerald",Count:1}, CareerLevel:2},
+			{action:"add", buy:{id:"minecraft:emerald",Count:{min:2,max:3}},sell:{id:"minecraft:pumpkin_pie",Count:1}, CareerLevel:2},
+			
+			{action:"add", buy:{id:"minecraft:dye",Damage:3,Count:{min:7,max:12}},sell:{id:"minecraft:emerald",Count:1}, CareerLevel:3},
+			{action:"add", buy:{id:"minecraft:emerald",Count:{min:1,max:1}},sell:{id:"minecraft:cake",Count:{min:1,max:1}}, CareerLevel:3},
+			{action:"add", buy:{id:"minecraft:emerald",Count:{min:1,max:1}},sell:{id:"minecraft:cookie",Count:{min:6,max:10}}, CareerLevel:3}
+
+        ]
+	}
+}
