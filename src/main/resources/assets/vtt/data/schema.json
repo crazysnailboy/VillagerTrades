@@ -1,0 +1,27 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Villager trade table schema",
+
+  "required": ["Profession", "Career", "Offers"],
+  "properties": {
+    "Profession": {
+      "description": "Category of villager",
+      "type": "string"
+    },
+    "Career": {
+      "description": "Specific type of villager within Profession",
+      "type": "string"
+    },
+    "Offers": {
+      "description": "Wrapper for Recipes list",
+      "type": "object",
+      "required": ["Recipes"],
+      "properties": {
+        "Recipes": {
+          "description": "List of trade actions",
+          "type": "array"
+        }
+      }
+    }
+  }
+}
